@@ -2,116 +2,146 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>時間割アプリ</title>
-  
+  <title>時間割</title>
+
   <style>
     @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPKyokashotai&display=swap');
 
     body {
       font-family: 'BIZ UDPKyokashotai', 'UD デジタル 教科書体 N-R', sans-serif;
       margin: 0;
-      padding: 15px;
+      padding: 12px;
       background-color: #f0f2f5;
-      color: #333;
+      color: #212121;
       -webkit-user-select: none;
       user-select: none;
     }
 
     button, input {
       font-family: inherit;
-      -webkit-tap-highlight-color: transparent; 
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .day-tabs {
-      display: flex;
-      margin-bottom: 0;
-      background-color: #cfd8dc;
-      border-radius: 8px 8px 0 0;
-      overflow: hidden;
-      border: 2px solid #546e7a;
-      border-bottom: none;
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 15px 5px;
-      background-color: transparent;
-      border: none;
-      cursor: pointer;
-      font-size: 18px;
-      font-weight: bold;
-      transition: background-color 0.2s;
-    }
-
-    .tab-btn:active {
-      background-color: #b0bec5;
+    /* 横スクロールできるようにする入れ物 */
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 8px;
     }
 
     table {
-      width: 100%;
       border-collapse: collapse;
       background-color: white;
-      border: 2px solid #546e7a;
+      border: 3px solid #37474f;
+      min-width: 720px;
+      width: 100%;
     }
 
     th, td {
-      border: 1px solid #90a4ae;
+      border: 2px solid #607d8b;
       text-align: center;
-      padding: 10px 5px;
-      height: 70px;
-      font-size: 16px;
+      vertical-align: middle;
+      padding: 8px 4px;
+      height: 64px;
     }
 
+    /* 曜日の見出し（月火水木金） */
+    .day-header {
+      background-color: #cfd8dc;
+      font-size: 26px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .day-header:active { background-color: #b0bec5; }
+
+    /* 学年の見出し（3・4） */
+    .grade-header {
+      background-color: #eceff1;
+      font-size: 20px;
+      font-weight: bold;
+      width: 64px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .grade-header:active { background-color: #cfd8dc; }
+
+    /* 左上の斜線セル */
+    .corner-cell {
+      background: linear-gradient(to top right,
+        #b0bec5 0%, #b0bec5 calc(50% - 1.5px),
+        #37474f calc(50% - 1.5px), #37474f calc(50% + 1.5px),
+        #b0bec5 calc(50% + 1.5px), #b0bec5 100%);
+      width: 90px;
+    }
+
+    /* 時間目の見出し列 */
     .time-col {
       background-color: #eceff1;
-      width: 70px;
+      width: 90px;
+      font-size: 22px;
       font-weight: bold;
+      line-height: 1.3;
     }
 
+    /* 時間表示（タップで編集できる） */
     .period-time {
       display: inline-block;
-      margin-top: 4px;
-      padding: 2px 4px;
-      font-size: 13px;
+      margin-top: 6px;
+      padding: 3px 5px;
+      font-size: 15px;
       font-weight: normal;
       color: #0277bd;
       border: 1px dashed #90caf9;
-      border-radius: 4px;
+      border-radius: 5px;
       cursor: pointer;
       transition: background-color 0.2s;
     }
+    .period-time:active { background-color: #cfd8dc; }
 
-    .period-time:active {
-      background-color: #cfd8dc;
-    }
-
-    .subject-cell, .time-cell {
+    /* 科目セル */
+    .subject-cell {
+      font-size: 22px;
+      line-height: 1.3;
       cursor: pointer;
       transition: background-color 0.2s;
     }
+    .subject-cell:active { background-color: #e3f2fd; }
 
-    .subject-cell:active, .time-cell:active {
-      background-color: #e3f2fd;
+    /* 下校時間セル */
+    .time-cell {
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
     }
+    .time-cell:active { background-color: #e3f2fd; }
 
+    /* 授業がないセル（黒） */
     .black-cell {
-      background-color: #e0e0e0;
+      background-color: #263238;
       cursor: default;
     }
 
+    /* 給食・昼休みの行 */
     .lunch-row td {
-      background-color: #fff9c4 !important;
+      background-color: #fff9c4;
       border: 2px solid #f9a825;
+      font-size: 22px;
       font-weight: bold;
       color: #f57f17;
-      text-align: center;
+    }
+    .lunch-row .time-col {
+      background-color: #fff9c4;
+      color: #f57f17;
+      font-size: 18px;
     }
 
     .action-btn {
-      margin-top: 20px;
+      margin-top: 18px;
       padding: 15px 20px;
       background-color: #ff5252;
       color: white;
@@ -123,52 +153,54 @@
       font-weight: bold;
     }
 
-    /* モーダルのスタイル */
+    .hint {
+      margin: 14px 2px 0;
+      font-size: 14px;
+      color: #607d8b;
+      line-height: 1.6;
+    }
+
+    /* モーダル（選択画面） */
     .modal {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background-color: rgba(0,0,0,0.5);
       justify-content: center;
       align-items: center;
       z-index: 1000;
     }
-
     .modal-content {
       background-color: white;
       padding: 25px;
       border-radius: 12px;
       width: 90%;
-      max-width: 450px;
+      max-width: 460px;
       text-align: center;
     }
+    .modal-content h3 { font-size: 20px; margin-top: 0; }
 
     .card-container {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
       justify-content: center;
-      margin-bottom: 25px;
+      margin-bottom: 22px;
     }
-
     .subject-card {
       padding: 12px 18px;
       background-color: #e1f5fe;
       border: 1px solid #0288d1;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 18px;
+      font-size: 20px;
     }
-
     .custom-input-container {
       display: flex;
       gap: 10px;
-      margin-bottom: 25px;
+      margin-bottom: 22px;
     }
-
     #customInput {
       flex: 1;
       padding: 12px;
@@ -178,7 +210,6 @@
       -webkit-user-select: auto;
       user-select: auto;
     }
-
     .custom-btn {
       padding: 12px 20px;
       background-color: #4caf50;
@@ -188,7 +219,6 @@
       font-size: 18px;
       font-weight: bold;
     }
-
     .close-btn {
       padding: 12px 25px;
       background-color: #9e9e9e;
@@ -202,117 +232,123 @@
 </head>
 <body>
 
-<div class="day-tabs">
-  <button class="tab-btn editable-element" data-type="day" data-day="0"><ruby>月<rt>げつ</rt></ruby></button>
-  <button class="tab-btn editable-element" data-type="day" data-day="1"><ruby>火<rt>か</rt></ruby></button>
-  <button class="tab-btn editable-element" data-type="day" data-day="2"><ruby>水<rt>すい</rt></ruby></button>
-  <button class="tab-btn editable-element" data-type="day" data-day="3"><ruby>木<rt>もく</rt></ruby></button>
-  <button class="tab-btn editable-element" data-type="day" data-day="4"><ruby>金<rt>きん</rt></ruby></button>
-</div>
-
-<div id="timetable-container">
+<div class="table-wrapper">
   <table id="timetable">
+    <thead>
+      <tr>
+        <th class="corner-cell" rowspan="2"></th>
+        <th class="day-header" colspan="2"><ruby>月<rt>げつ</rt></ruby></th>
+        <th class="day-header" colspan="2"><ruby>火<rt>か</rt></ruby></th>
+        <th class="day-header" colspan="2"><ruby>水<rt>すい</rt></ruby></th>
+        <th class="day-header" colspan="2"><ruby>木<rt>もく</rt></ruby></th>
+        <th class="day-header" colspan="2"><ruby>金<rt>きん</rt></ruby></th>
+      </tr>
+      <tr>
+        <th class="grade-header">3</th>
+        <th class="grade-header">4</th>
+        <th class="grade-header">3</th>
+        <th class="grade-header">4</th>
+        <th class="grade-header">3</th>
+        <th class="grade-header">4</th>
+        <th class="grade-header">3</th>
+        <th class="grade-header">4</th>
+        <th class="grade-header">3</th>
+        <th class="grade-header">4</th>
+      </tr>
+    </thead>
     <tbody>
       <!-- 1時間目 -->
       <tr>
-        <th class="time-col">1<ruby>時間目<rt>じかんめ</rt></ruby><br><span class="period-time">9:40-10:25</span></th>
-        <td data-id="mon-1-3" class="subject-cell day-mon"><ruby>体育<rt>たいいく</rt></ruby></td>
-        <td data-id="mon-1-4" class="subject-cell day-mon"></td>
-        <td data-id="tue-1-3" class="subject-cell day-tue"></td>
-        <td data-id="tue-1-4" class="subject-cell day-tue"><ruby>国語<rt>こくご</rt></ruby></td>
-        <td data-id="wed-1-3" class="subject-cell day-wed"></td>
-        <td data-id="wed-1-4" class="subject-cell day-wed"><ruby>音楽<rt>おんがく</rt></ruby></td>
-        <td data-id="thu-1-3" class="subject-cell day-thu"><ruby>図工<rt>ずこう</rt></ruby></td>
-        <td data-id="thu-1-4" class="subject-cell day-thu"><ruby>図工<rt>ずこう</rt></ruby></td>
-        <td data-id="fri-1-3" class="subject-cell day-fri"><ruby>自立<rt>じりつ</rt></ruby><br>(プール)</td>
-        <td data-id="fri-1-4" class="subject-cell day-fri"><ruby>自立<rt>じりつ</rt></ruby><br>(プール)</td>
+        <th class="time-col">1<br><span class="period-time">9:40-10:25</span></th>
+        <td colspan="2" class="subject-cell"><ruby>体育<rt>たいいく</rt></ruby></td>
+        <td colspan="2" class="subject-cell"><ruby>国語<rt>こくご</rt></ruby></td>
+        <td class="subject-cell"><ruby>音楽<rt>おんがく</rt></ruby></td>
+        <td class="subject-cell"><ruby>図工<rt>ずこう</rt></ruby></td>
+        <td class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby><br>(プール)</td>
+        <td class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby></td>
+        <td colspan="2" class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby></td>
       </tr>
 
       <!-- 2時間目 -->
       <tr>
-        <th class="time-col">2<ruby>時間目<rt>じかんめ</rt></ruby><br><span class="period-time">10:40-11:25</span></th>
-        <td data-id="mon-2-3" class="subject-cell day-mon"><ruby>算数<rt>さんすう</rt></ruby></td>
-        <td data-id="mon-2-4" class="subject-cell day-mon"></td>
-        <td data-id="tue-2-3" class="subject-cell day-tue">POS</td>
-        <td data-id="tue-2-4" class="subject-cell day-tue"><ruby>自立<rt>じりつ</rt></ruby></td>
-        <td data-id="wed-2-3" class="subject-cell day-wed"><ruby>図工<rt>ずこう</rt></ruby></td>
-        <td data-id="wed-2-4" class="subject-cell day-wed"><ruby>音楽<rt>おんがく</rt></ruby></td>
-        <td data-id="thu-2-3" class="subject-cell day-thu"><ruby>音楽<rt>おんがく</rt></ruby></td>
-        <td data-id="thu-2-4" class="subject-cell day-thu"><ruby>音楽<rt>おんがく</rt></ruby></td>
-        <td data-id="fri-2-3" class="subject-cell day-fri"><ruby>生単<rt>せいたん</rt></ruby></td>
-        <td data-id="fri-2-4" class="subject-cell day-fri"><ruby>生単<rt>せいたん</rt></ruby></td>
+        <th class="time-col">2<br><span class="period-time">10:40-11:25</span></th>
+        <td colspan="2" class="subject-cell"><ruby>算数<rt>さんすう</rt></ruby></td>
+        <td class="subject-cell">POS</td>
+        <td class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby></td>
+        <td class="subject-cell"><ruby>図工<rt>ずこう</rt></ruby></td>
+        <td class="subject-cell"><ruby>音楽<rt>おんがく</rt></ruby></td>
+        <td class="subject-cell"><ruby>生単<rt>せいたん</rt></ruby></td>
+        <td class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby><br>(プール)</td>
+        <td colspan="2" class="subject-cell"><ruby>生単<rt>せいたん</rt></ruby></td>
       </tr>
 
       <!-- 給食・昼休み -->
       <tr class="lunch-row">
-        <th class="time-col"><ruby>給食<rt>きゅうしょく</rt></ruby>・<ruby>昼休<rt>ひるやす</rt></ruby>み<br>11:25-13:20</th>
+        <th class="time-col"><ruby>給食<rt>きゅうしょく</rt></ruby></th>
         <td colspan="10"><ruby>給食<rt>きゅうしょく</rt></ruby>・<ruby>昼休<rt>ひるやす</rt></ruby>み</td>
       </tr>
 
       <!-- 3時間目 -->
       <tr>
-        <th class="time-col">3<ruby>時間目<rt>じかんめ</rt></ruby><br><span class="period-time">13:20-14:05</span></th>
-        <td data-id="mon-3-3" class="subject-cell day-mon"><ruby>自立<rt>じりつ</rt></ruby></td>
-        <td data-id="mon-3-4" class="subject-cell day-mon"></td>
-        <td data-id="tue-3-3" class="subject-cell day-tue"><ruby>生単<rt>せいたん</rt></ruby></td>
-        <td data-id="tue-3-4" class="subject-cell day-tue"><ruby>生単<rt>せいたん</rt></ruby></td>
-        <td data-id="wed-3-3" class="subject-cell day-wed"></td>
-        <td data-id="wed-3-4" class="subject-cell day-wed"></td>
-        <td data-id="thu-3-3" class="subject-cell day-thu"><ruby>国語<rt>こくご</rt></ruby></td>
-        <td class="black-cell subject-cell day-thu"></td>
-        <td data-id="fri-3-3" class="subject-cell day-fri"><ruby>総合<rt>そうごう</rt></ruby></td>
-        <td class="black-cell subject-cell day-fri"></td>
+        <th class="time-col">3<br><span class="period-time">13:20-14:05</span></th>
+        <td class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby></td>
+        <td class="subject-cell"><ruby>生単<rt>せいたん</rt></ruby></td>
+        <td colspan="2" class="subject-cell"><ruby>生単<rt>せいたん</rt></ruby></td>
+        <td colspan="2" class="subject-cell"><ruby>国語<rt>こくご</rt></ruby></td>
+        <td colspan="2" class="subject-cell"><ruby>総合<rt>そうごう</rt></ruby></td>
+        <td colspan="2" class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby></td>
       </tr>
 
       <!-- 4時間目 -->
       <tr>
-        <th class="time-col">4<ruby>時間目<rt>じかんめ</rt></ruby><br><span class="period-time">14:10-14:55</span></th>
-        <td class="black-cell subject-cell day-mon"></td>
-        <td data-id="mon-4-4" class="subject-cell day-mon"><ruby>自立<rt>じりつ</rt></ruby><br>(POS)</td>
-        <td data-id="tue-4-3" class="subject-cell day-tue"><ruby>生単<rt>せいたん</rt></ruby></td>
-        <td data-id="tue-4-4" class="subject-cell day-tue"></td>
-        <td data-id="wed-4-3" class="subject-cell day-wed">POS</td>
-        <td data-id="wed-4-4" class="subject-cell day-wed"></td>
-        <td data-id="thu-4-3" class="subject-cell day-thu"></td>
-        <td data-id="thu-4-4" class="subject-cell day-thu"><ruby>自立<rt>じりつ</rt></ruby></td>
-        <td data-id="fri-4-3" class="subject-cell day-fri"><ruby>自立<rt>じりつ</rt></ruby></td>
-        <td data-id="fri-4-4" class="subject-cell day-fri"></td>
+        <th class="time-col">4<br><span class="period-time">14:10-14:55</span></th>
+        <td class="black-cell"></td>
+        <td class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby><br>(POS)</td>
+        <td class="subject-cell"><ruby>生単<rt>せいたん</rt></ruby></td>
+        <td class="subject-cell">POS</td>
+        <td colspan="2" class="black-cell"></td>
+        <td class="black-cell"></td>
+        <td class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby></td>
+        <td colspan="2" class="black-cell"></td>
       </tr>
 
       <!-- 下校 -->
       <tr class="dismissal-row">
         <th class="time-col"><ruby>下校<rt>げこう</rt></ruby></th>
-        <td data-id="mon-out-3" class="time-cell day-mon">14:00</td>
-        <td data-id="mon-out-4" class="time-cell day-mon">15:30</td>
-        <td colspan="2" data-id="tue-out" class="time-cell day-tue">15:30</td>
-        <td colspan="2" data-id="wed-out" class="time-cell day-wed">14:00</td>
-        <td colspan="2" data-id="thu-out" class="time-cell day-thu">15:30</td>
-        <td colspan="2" data-id="fri-out" class="time-cell day-fri">14:00</td>
+        <td class="time-cell">14:00</td>
+        <td class="time-cell">15:30</td>
+        <td colspan="2" class="time-cell">15:30</td>
+        <td colspan="2" class="time-cell">14:00</td>
+        <td colspan="2" class="time-cell">15:30</td>
+        <td colspan="2" class="time-cell">14:00</td>
       </tr>
     </tbody>
   </table>
 </div>
+
+<p class="hint">
+  ※ <ruby>曜日<rt>ようび</rt></ruby>・<ruby>学年<rt>がくねん</rt></ruby>・<ruby>科目<rt>かもく</rt></ruby>・<ruby>時間<rt>じかん</rt></ruby>・<ruby>下校<rt>げこう</rt></ruby>は、タップして<ruby>編集<rt>へんしゅう</rt></ruby>できます。
+</p>
+
 <button id="resetBtn" class="action-btn"><ruby>変更<rt>へんこう</rt></ruby>を<ruby>初期化<rt>しょきか</rt></ruby>する</button>
 
 <div id="cardModal" class="modal">
   <div class="modal-content">
     <h3 id="modalTitle"><ruby>選択<rt>せんたく</rt></ruby>・<ruby>入力<rt>にゅうりょく</rt></ruby></h3>
-    
     <div id="cardContainer" class="card-container"></div>
-    
     <div class="custom-input-container">
       <input type="text" id="customInput" placeholder="直接入力できます">
       <button id="customSubmitBtn" class="custom-btn">決定</button>
     </div>
-    
     <button id="closeModalBtn" class="close-btn"><ruby>閉<rt>と</rt></ruby>じる</button>
   </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // 編集可能にする要素をすべて取得
-  const editables = document.querySelectorAll('td.subject-cell, td.time-cell, .tab-btn.editable-element, span.period-time');
+  const editables = document.querySelectorAll(
+    '.subject-cell, .time-cell, .day-header, .grade-header, .period-time'
+  );
   const modal = document.getElementById('cardModal');
   const cardContainer = document.getElementById('cardContainer');
   const customInput = document.getElementById('customInput');
@@ -320,31 +356,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const resetBtn = document.getElementById('resetBtn');
   const closeModalBtn = document.getElementById('closeModalBtn');
   const modalTitle = document.getElementById('modalTitle');
-  
+
   let currentTargetEl = null;
 
   const subjectCards = [
     '<ruby>体育<rt>たいいく</rt></ruby>',
     '<ruby>国語<rt>こくご</rt></ruby>',
+    '<ruby>算数<rt>さんすう</rt></ruby>',
     '<ruby>音楽<rt>おんがく</rt></ruby>',
     '<ruby>図工<rt>ずこう</rt></ruby>',
-    '<ruby>自立<rt>じりつ</rt></ruby>',
-    '<ruby>自立<rt>じりつ</rt></ruby><br>(プール)',
-    '<ruby>算数<rt>さんすう</rt></ruby>',
-    'POS',
     '<ruby>生単<rt>せいたん</rt></ruby>',
     '<ruby>総合<rt>そうごう</rt></ruby>',
-    '<ruby>自立<rt>じりつ</rt></ruby><br>(POS)'
+    '<ruby>自立<rt>じりつ</rt></ruby>',
+    '<ruby>自立<rt>じりつ</rt></ruby><br>(プール)',
+    '<ruby>自立<rt>じりつ</rt></ruby><br>(POS)',
+    'POS'
   ];
 
-  const timeCards = [
-    '11:30', '13:00', '14:00', '14:30', '15:00', '15:30'
-  ];
+  const timeCards = ['11:30', '13:00', '14:00', '14:30', '15:00', '15:30'];
 
-  // 1〜4時間目の時間範囲カード
-  const periodTimeCards = [
-    '9:40-10:25', '10:40-11:25', '13:20-14:05', '14:10-14:55'
-  ];
+  const periodTimeCards = ['9:40-10:25', '10:40-11:25', '13:20-14:05', '14:10-14:55'];
 
   const dayCards = [
     '<ruby>月<rt>げつ</rt></ruby>',
@@ -354,7 +385,8 @@ document.addEventListener('DOMContentLoaded', () => {
     '<ruby>金<rt>きん</rt></ruby>'
   ];
 
-  // カードを生成して表示する共通関数
+  const gradeCards = ['1', '2', '3', '4', '5', '6'];
+
   function showCards(cards) {
     cardContainer.style.display = 'flex';
     cards.forEach(cardHtml => {
@@ -374,23 +406,20 @@ document.addEventListener('DOMContentLoaded', () => {
       cardContainer.innerHTML = '';
       customInput.value = '';
 
-      const isTimeCell = el.classList.contains('time-cell');
-      const isSubjectCell = el.classList.contains('subject-cell');
-      const isDayTab = el.classList.contains('tab-btn');
-      const isPeriodTime = el.classList.contains('period-time');
-
-      // セルの種類に応じてカードを表示
-      if (isDayTab) {
-        modalTitle.textContent = '曜日を選択してください';
+      if (el.classList.contains('day-header')) {
+        modalTitle.textContent = '曜日を選んでください';
         showCards(dayCards);
-      } else if (isPeriodTime) {
-        modalTitle.textContent = '時間を選択してください';
+      } else if (el.classList.contains('grade-header')) {
+        modalTitle.textContent = '学年を選んでください';
+        showCards(gradeCards);
+      } else if (el.classList.contains('period-time')) {
+        modalTitle.textContent = '時間を選んでください';
         showCards(periodTimeCards);
-      } else if (isTimeCell) {
-        modalTitle.textContent = '下校時間を選択してください';
+      } else if (el.classList.contains('time-cell')) {
+        modalTitle.textContent = '下校時間を選んでください';
         showCards(timeCards);
-      } else if (isSubjectCell) {
-        modalTitle.textContent = '科目を選択してください';
+      } else if (el.classList.contains('subject-cell')) {
+        modalTitle.textContent = '科目を選んでください';
         showCards(subjectCards);
       }
 
@@ -399,9 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function updateCell(content) {
-    if (currentTargetEl) {
-      currentTargetEl.innerHTML = content;
-    }
+    if (currentTargetEl) currentTargetEl.innerHTML = content;
     closeModal();
   }
 
@@ -417,15 +444,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   closeModalBtn.addEventListener('click', closeModal);
 
-  // 背景（モーダルの外側）をタップしても閉じる
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
   });
 
   resetBtn.addEventListener('click', () => {
-    if(confirm('変更を初期化しますか？')) {
-      location.reload();
-    }
+    if (confirm('変更を初期化しますか？')) location.reload();
   });
 });
 </script>
