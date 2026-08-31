@@ -35,7 +35,9 @@ button, input { font-family: inherit; font-weight: 700; -webkit-tap-highlight-co
   letter-spacing: 0.1em;
 }
 .menu-btn {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   width: 100%;
   text-align: left;
   background: white;
@@ -50,6 +52,15 @@ button, input { font-family: inherit; font-weight: 700; -webkit-tap-highlight-co
   transition: background-color 0.15s;
   -webkit-text-stroke: 0.3px currentColor;
 }
+.icon-slot {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  color: #546e7a;
+}
+.item-icon { display: block; }
+/* 見出し帯の中のマーク */
+.item-head .item-icon { display: inline-block; vertical-align: -6px; }
 .menu-btn:active { background: #e3f2fd; }
 .menu-btn .num { color: #546e7a; margin-right: 10px; }
 
@@ -118,6 +129,14 @@ button, input { font-family: inherit; font-weight: 700; -webkit-tap-highlight-co
   transition: background-color 0.2s;
 }
 .view-btn.active { background: #1976d2; color: white; border-color: #1976d2; }
+
+.toggle-btn {
+  display: block; width: 100%; padding: 13px;
+  margin-bottom: 12px;
+  font-size: 19px; background: #eceff1; color: #455a64;
+  border: 2px solid #b0bec5; border-radius: 8px; cursor: pointer;
+}
+.toggle-btn:active { background: #cfd8dc; }
 
 .show-btn {
   display: block; width: 100%; padding: 18px;
@@ -208,9 +227,11 @@ button, input { font-family: inherit; font-weight: 700; -webkit-tap-highlight-co
   box-shadow: 0 0 0 3px #bbdefb;
 }
 .menu-btn.now::before {
-  content: '▶ ';
+  content: '▶';
   color: #1976d2;
 }
+.menu-btn.now .icon-slot { color: #1976d2; }
+.menu-btn.done .icon-slot { color: #2e7d32; }
 .menu-btn.done {
   background: #e8f5e9;
   border-color: #2e7d32;
@@ -231,12 +252,6 @@ button, input { font-family: inherit; font-weight: 700; -webkit-tap-highlight-co
 }
 .undo-btn:active { background: #cfd8dc; }
 
-/* 進みぐあい */
-.progress-box {
-  text-align: center; font-size: 18px; color: #455a64;
-  background: #eceff1; border-radius: 8px;
-  padding: 10px; margin-bottom: 14px;
-}
 
 .rule-num {
   flex: 0 0 42px;
@@ -440,7 +455,6 @@ table#timetable {
 <!-- ========== ホーム画面 ========== -->
 <div id="homeView">
   <div class="home-title">あさのかい</div>
-  <div class="progress-box" id="progressBox"></div>
 
   <button class="menu-btn" id="item1Btn" data-item="1">
     <span class="num">1.</span><span id="item1Label"><ruby>日<rt>ひ</rt></ruby>にち・<ruby>曜日<rt>ようび</rt></ruby>・<ruby>天気<rt>てんき</rt></ruby></span>
@@ -491,7 +505,7 @@ table#timetable {
       <button class="cal-arrow" id="nextMonth">›</button>
     </div>
     <table class="cal-table" id="calTable"></table>
-    <button class="today-btn" id="todayBtn">きょうに もどす</button>
+    <button class="today-btn" id="todayBtn">きょう</button>
   </div>
 
   <div class="sec-head">② <ruby>天気<rt>てんき</rt></ruby>を えらぶ</div>
@@ -689,12 +703,12 @@ table#timetable {
     </div>
 
     <button class="show-btn" id="startBtn">▶ スタート</button>
-    <button class="stop-btn" id="stopBtn" style="display:none;">■ おわり</button>
+    <button class="stop-btn" id="stopBtn" style="display:none;">⏱ タイマーを とめる</button>
     <div class="result-box" id="resultBox" style="display:none;"></div>
     <button class="undo-btn" id="againBtn" style="display:none;">↩ もういちど</button>
   </div>
 
-  <button class="show-btn item-done" data-item="7">✓ おわり</button>
+  <button class="show-btn item-done" data-item="7">✓ スピーチ おわり</button>
   <button class="undo-btn item-undo" data-item="7" style="display:none;">↩ おわりを とりけす</button>
 
   <!-- おたすけ（こまったときだけ 使う） -->
@@ -735,9 +749,14 @@ table#timetable {
     <div class="step-label">③ できたら「この画面を出す」を押す</div>
   </div>
 
-  <button class="show-btn" id="showBtn">✓ この<ruby>画面<rt>がめん</rt></ruby>を<ruby>出<rt>だ</rt></ruby>す</button>
+  <!-- えらんだ曜日の予定（ここで編集できる） -->
+  <div id="teacherPreview"></div>
 
-  <div id="teacherTableSlot"></div>
+  <!-- 週の時程（ふだんは たたんでおく） -->
+  <button class="toggle-btn" id="toggleWeekBtn">▼ <ruby>週<rt>しゅう</rt></ruby>の<ruby>時程<rt>じてい</rt></ruby>を 見る</button>
+  <div id="teacherTableSlot" style="display:none;"></div>
+
+  <button class="show-btn" id="showBtn">✓ この<ruby>画面<rt>がめん</rt></ruby>を<ruby>出<rt>だ</rt></ruby>す</button>
 
   <p class="hint">※ 曜日・学年・科目・時間・下校時間は、タップして変更できます。<br>
   ※ マスをタップすると「3・4を いっしょにする／わける」も えらべます。</p>
@@ -816,6 +835,39 @@ document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
   }
 
+  /* ===== 7つの項目のマーク（線画アイコン） ===== */
+  // どれも 40x40 の線画。色は currentColor で まわりの文字色に合わせる
+  const ICONS = {
+    // 1 カレンダーと太陽
+    '1': '<path d="M4 13h20v20H4z"/><path d="M4 19h20"/><path d="M9 10v5M19 10v5"/>' +
+         '<circle cx="31" cy="10" r="4.5"/>' +
+         '<path d="M31 2v2M31 16v2M23 10h2M37 10h2M25.7 4.7l1.4 1.4M36.3 15.3l-1.4-1.4"/>',
+    // 2 手をあげている人
+    '2': '<circle cx="17" cy="12" r="5"/><path d="M17 17v13"/><path d="M17 30l-5 8M17 30l5 8"/>' +
+         '<path d="M17 21l-7 4"/><path d="M17 21l9-6M26 15V6"/>',
+    // 3 ならんだマスの表
+    '3': '<path d="M6 9h28v24H6z"/><path d="M6 17h28M6 25h28M15 9v24M25 9v24"/>',
+    // 4 おさらと はし
+    '4': '<ellipse cx="17" cy="24" rx="13" ry="8"/><ellipse cx="17" cy="24" rx="7" ry="4"/>' +
+         '<path d="M30 10L27 32M35 10l-2 22"/>',
+    // 5 ランドセル
+    '5': '<path d="M9 15h22v18H9z"/><path d="M9 22h22"/><path d="M14 15V9h12v6"/>' +
+         '<path d="M18 25h4v4h-4z"/>',
+    // 6 黒板の前に立つ人
+    '6': '<path d="M16 4h22v15H16z"/><path d="M20 9h14M20 14h9"/>' +
+         '<circle cx="9" cy="22" r="4"/><path d="M9 26v8M9 34l-3 5M9 34l3 5M9 29h6"/>',
+    // 7 マイク
+    '7': '<rect x="14" y="5" width="12" height="19" rx="6"/><path d="M8 20a12 12 0 0 0 24 0"/>' +
+         '<path d="M20 32v6M13 38h14"/>'
+  };
+
+  // アイコンのSVGを作る
+  function iconSvg(num, size) {
+    return '<svg class="item-icon" viewBox="0 0 40 40" width="' + size + '" height="' + size + '" ' +
+           'fill="none" stroke="currentColor" stroke-width="2.4" ' +
+           'stroke-linecap="round" stroke-linejoin="round">' + ICONS[num] + '</svg>';
+  }
+
   /* ===== 項目の共通の仕組み ===== */
   // 各項目の番号と名前（ふりがな付き）
   const ITEMS = {
@@ -834,7 +886,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 画面の上に「2. 名前よび」の見出しを出す
   function setItemHead(view, num) {
     const head = view.querySelector('.item-head');
-    if (head) head.innerHTML = num + '. ' + ITEMS[num];
+    if (head) head.innerHTML = iconSvg(num, 34) + ' ' + num + '. ' + ITEMS[num];
   }
 
   // その画面の「おわり」「とりけす」ボタンの出しわけ
@@ -844,6 +896,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const isDone = doneItems.has(num);
     if (doneBtn) doneBtn.style.display = isDone ? 'none' : 'block';
     if (undoBtn) undoBtn.style.display = isDone ? 'block' : 'none';
+  }
+
+  // ホーム画面の各項目に、マークを差し込む
+  function addHomeIcons() {
+    document.querySelectorAll('.menu-btn').forEach(btn => {
+      const num = btn.getAttribute('data-item');
+      const span = document.createElement('span');
+      span.className = 'icon-slot';
+      span.innerHTML = iconSvg(num, 38);
+      btn.insertBefore(span, btn.firstChild);
+    });
   }
 
   // ホーム画面のチェックと「いまここ」印を付け直す
@@ -860,8 +923,6 @@ document.addEventListener('DOMContentLoaded', () => {
         nowSet = true;
       }
     });
-    const box = document.getElementById('progressBox');
-    if (box) box.textContent = '7つのうち ' + doneItems.size + 'つ おわりました';
   }
 
   function markDone(num) {
@@ -938,12 +999,15 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('teacherLink').addEventListener('click', () => {
     pickingDay = selectedDay;
     updateViewBtns();
-    renderTeacherTable();
+    renderTeacherPreview();
     showView('teacher');
   });
 
   /* ===== 先生用の設定画面 ===== */
   const viewBtns = document.querySelectorAll('.view-btn');
+  const teacherPreview = document.getElementById('teacherPreview');
+  const toggleWeekBtn = document.getElementById('toggleWeekBtn');
+  let weekOpen = false;
 
   function updateViewBtns() {
     viewBtns.forEach(b => {
@@ -951,16 +1015,44 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 設定画面には、いつも編集できる全体の表を出す
-  function renderTeacherTable() {
-    tableWrapper.style.display = 'block';
-    teacherTableSlot.appendChild(tableWrapper);
+  // えらんだ曜日の予定を、設定画面に出す（ここでも編集できる）
+  function renderTeacherPreview() {
+    if (pickingDay === 'all') {
+      // 「全部」のときは 週の表そのものを見せる
+      teacherPreview.innerHTML = '';
+      weekOpen = true;
+      showWeekTable(true);
+      toggleWeekBtn.style.display = 'none';
+    } else {
+      toggleWeekBtn.style.display = 'block';
+      teacherPreview.innerHTML = buildDayTable(parseInt(pickingDay, 10));
+      wireDayTable(teacherPreview);
+      showWeekTable(weekOpen);
+    }
   }
+
+  // 週の表の 出し入れ
+  function showWeekTable(open) {
+    teacherTableSlot.style.display = open ? 'block' : 'none';
+    if (open) {
+      tableWrapper.style.display = 'block';
+      teacherTableSlot.appendChild(tableWrapper);
+    }
+    toggleWeekBtn.innerHTML = open
+      ? '▲ <ruby>週<rt>しゅう</rt></ruby>の<ruby>時程<rt>じてい</rt></ruby>を とじる'
+      : '▼ <ruby>週<rt>しゅう</rt></ruby>の<ruby>時程<rt>じてい</rt></ruby>を 見る';
+  }
+
+  toggleWeekBtn.addEventListener('click', () => {
+    weekOpen = !weekOpen;
+    showWeekTable(weekOpen);
+  });
 
   viewBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       pickingDay = btn.getAttribute('data-day');
       updateViewBtns();
+      renderTeacherPreview();
     });
   });
 
@@ -1105,8 +1197,8 @@ document.addEventListener('DOMContentLoaded', () => {
     showView('schedule');
   }
 
-  // 1日だけ大きく表示する
-  function renderSingleDay(di) {
+  // 1日分の表を作る（子ども用の大きい表示にも、先生の設定画面にも使う）
+  function buildDayTable(di) {
     let rows = '';
     TT.rows.forEach((row, ri) => {
       if (row.type === 'lunch') {
@@ -1132,27 +1224,26 @@ document.addEventListener('DOMContentLoaded', () => {
       rows += '<tr><th class="sd-th-time">' + label + '</th>' + tds + '</tr>';
     });
 
-    scheduleContent.innerHTML =
-      '<table class="sd-table"><thead>' +
-      '<tr><th class="sd-th-corner" rowspan="2"></th>' +
-      '<th class="sd-th-day" colspan="2">' + TT.days[di] +
-      '<ruby>曜日<rt>ようび</rt></ruby></th></tr>' +
-      '<tr><th class="sd-th-grade">' + TT.grades[0] + '</th>' +
-      '<th class="sd-th-grade">' + TT.grades[1] + '</th></tr>' +
-      '</thead><tbody>' + rows + '</tbody></table>';
+    return '<table class="sd-table"><thead>' +
+           '<tr><th class="sd-th-corner" rowspan="2"></th>' +
+           '<th class="sd-th-day" colspan="2">' + TT.days[di] +
+           '<ruby>曜日<rt>ようび</rt></ruby></th></tr>' +
+           '<tr><th class="sd-th-grade">' + TT.grades[0] + '</th>' +
+           '<th class="sd-th-grade">' + TT.grades[1] + '</th></tr>' +
+           '</thead><tbody>' + rows + '</tbody></table>';
+  }
 
-    scheduleContent.querySelectorAll('.sd-td').forEach(td => {
-      if (td.classList.contains('sd-black')) return;
+  // 1日分の表を、タップして編集できるようにする
+  function wireDayTable(box) {
+    box.querySelectorAll('.sd-td').forEach(td => {
       td.addEventListener('click', () => openCellModal(td.dataset));
     });
   }
 
-  function sdTd(val, span, ri, di, gi) {
-    const pos = 'data-r="' + ri + '" data-d="' + di + '" data-g="' + gi + '"';
-    if (val === null) {
-      return '<td class="sd-td sd-black" ' + span + ' ' + pos + '></td>';
-    }
-    return '<td class="sd-td" ' + span + ' ' + pos + '>' + val + '</td>';
+  // 子ども用の「1日だけ大きく表示」
+  function renderSingleDay(di) {
+    scheduleContent.innerHTML = buildDayTable(di);
+    wireDayTable(scheduleContent);
   }
 
   // 表示を作り直す（今見ている画面に合わせて）
@@ -1160,6 +1251,9 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTable();
     if (currentView === 'schedule' && selectedDay !== 'all') {
       renderSingleDay(parseInt(selectedDay, 10));
+    }
+    if (currentView === 'teacher') {
+      renderTeacherPreview();
     }
   }
 
@@ -1195,9 +1289,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function openDateView() {
     const today = new Date();
-    if (!pickedDate) pickedDate = today;
-    calYear = pickedDate.getFullYear();
-    calMonth = pickedDate.getMonth();
+    // 最初は どこも えらばれていない状態にする（今日が分からないように）
+    calYear = pickedDate ? pickedDate.getFullYear() : today.getFullYear();
+    calMonth = pickedDate ? pickedDate.getMonth() : today.getMonth();
     renderCalendar();
     renderWeather();
     updatePreview();
@@ -1205,7 +1299,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderCalendar() {
-    const today = new Date();
     calMonthLabel.textContent = calYear + '年 ' + (calMonth + 1) + '月';
 
     let html = '<thead><tr>';
@@ -1224,7 +1317,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const pos = (firstPos + d - 1) % 7;
       const thisDate = new Date(calYear, calMonth, d);
       let cls = (pos === 6) ? 'sun' : (pos === 5) ? 'sat' : '';
-      if (sameDay(thisDate, today)) cls += ' today';
+      // 今日の印は付けない（自分でさがせるように）
       if (sameDay(thisDate, pickedDate)) cls += ' picked';
       html += '<td class="' + cls.trim() + '" data-day="' + d + '">' + d + '</td>';
       if (pos === 6 && d !== lastDate) html += '</tr><tr>';
@@ -1580,6 +1673,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 最初はホーム画面
+  addHomeIcons();
   renderTable();
   refreshHome();
   showView('home');
