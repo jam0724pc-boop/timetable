@@ -1,665 +1,1588 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>時間割</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>あさのかい</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=BIZ+UDPGothic:wght@400;700&display=swap');
 
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=BIZ+UDPGothic:wght@400;700&display=swap');
+body {
+  font-family: 'UD デジタル 教科書体 NK-B', 'UDデジタル教科書体 NK-B',
+               'UD デジタル 教科書体 NK-R', 'UDデジタル教科書体 NK-R',
+               'Klee One', 'BIZ UDPGothic', sans-serif;
+  font-weight: 700;
+  margin: 0;
+  padding: 12px;
+  background-color: #f0f2f5;
+  color: #212121;
+  -webkit-user-select: none;
+  user-select: none;
+}
+button, input { font-family: inherit; font-weight: 700; -webkit-tap-highlight-color: transparent; }
 
-    body {
-      font-family: 'UD デジタル 教科書体 NK-B', 'UDデジタル教科書体 NK-B',
-                   'UD デジタル 教科書体 NK-R', 'UDデジタル教科書体 NK-R',
-                   'Klee One', 'BIZ UDPGothic', sans-serif;
-      font-weight: 700;
-      margin: 0;
-      padding: 12px;
-      background-color: #f0f2f5;
-      color: #212121;
-      -webkit-user-select: none;
-      user-select: none;
-    }
+/* ===== ホーム画面 ===== */
+.home-title {
+  background: #111;
+  color: white;
+  font-size: 42px;
+  text-align: center;
+  padding: 18px 10px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  letter-spacing: 0.1em;
+}
+.menu-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: white;
+  border: 3px solid #90a4ae;
+  border-radius: 12px;
+  padding: 18px 16px;
+  margin-bottom: 12px;
+  font-size: 30px;
+  line-height: 1.4;
+  color: #212121;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  -webkit-text-stroke: 0.3px currentColor;
+}
+.menu-btn:active { background: #e3f2fd; }
+.menu-btn .num { color: #546e7a; margin-right: 10px; }
 
-    button, input {
-      font-family: inherit;
-      -webkit-tap-highlight-color: transparent;
-    }
+.teacher-link {
+  display: block;
+  width: 100%;
+  margin-top: 22px;
+  padding: 12px;
+  font-size: 16px;
+  background: #eceff1;
+  color: #546e7a;
+  border: 2px solid #cfd8dc;
+  border-radius: 8px;
+  cursor: pointer;
+}
 
-    /* 横スクロールできるようにする入れ物 */
-    .table-wrapper {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      border-radius: 8px;
-    }
+/* ===== 共通のもどるボタン ===== */
+.back-btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  margin-bottom: 14px;
+  font-size: 26px;
+  background: #546e7a;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.back-btn:active { background: #37474f; }
 
-    table {
-      border-collapse: collapse;
-      background-color: white;
-      border: 3px solid #37474f;
-      min-width: 760px;
-      width: 100%;
-    }
+/* ===== 準備中画面 ===== */
+.soon-box {
+  background: white;
+  border: 3px solid #90a4ae;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+}
+.soon-title { font-size: 34px; margin-bottom: 20px; }
+.soon-text { font-size: 22px; color: #607d8b; line-height: 1.6; }
 
-    th, td {
-      border: 2px solid #607d8b;
-      text-align: center;
-      vertical-align: middle;
-      padding: 8px 4px;
-      height: 74px;
-      -webkit-text-stroke: 0.3px currentColor;
-    }
+/* ===== 先生用の設定画面 ===== */
+.teacher-head {
+  background: #37474f;
+  color: white;
+  font-size: 22px;
+  padding: 14px;
+  border-radius: 8px 8px 0 0;
+  text-align: center;
+}
+.teacher-body {
+  background: white;
+  border: 2px solid #607d8b;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.step-label { font-size: 17px; color: #455a64; margin: 4px 0 8px; }
+.view-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.view-btn {
+  flex: 1; min-width: 48px; padding: 14px 6px;
+  font-size: 23px; background: #e0e0e0;
+  border: 2px solid #b0bec5; border-radius: 8px; cursor: pointer;
+  transition: background-color 0.2s;
+}
+.view-btn.active { background: #1976d2; color: white; border-color: #1976d2; }
 
-    /* 曜日の見出し（月火水木金） */
-    .day-header {
-      background-color: #cfd8dc;
-      font-size: 30px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    .day-header:active { background-color: #b0bec5; }
+.show-btn {
+  display: block; width: 100%; padding: 18px;
+  font-size: 26px; background: #2e7d32; color: white;
+  border: none; border-radius: 10px; cursor: pointer; margin-bottom: 12px;
+}
+.show-btn:active { background: #1b5e20; }
 
-    /* 学年の見出し（3・4） */
-    .grade-header {
-      background-color: #eceff1;
-      font-size: 24px;
-      font-weight: bold;
-      width: 66px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    .grade-header:active { background-color: #cfd8dc; }
+.action-btn {
+  padding: 14px 20px; background-color: #ff5252; color: white;
+  border: none; border-radius: 8px; cursor: pointer;
+  width: 100%; font-size: 18px;
+}
+.hint { margin: 10px 2px 0; font-size: 14px; color: #607d8b; line-height: 1.6; font-weight: 400; }
 
-    /* 左上の斜線セル */
-    .corner-cell {
-      background: linear-gradient(to top right,
-        #b0bec5 0%, #b0bec5 calc(50% - 1.5px),
-        #37474f calc(50% - 1.5px), #37474f calc(50% + 1.5px),
-        #b0bec5 calc(50% + 1.5px), #b0bec5 100%);
-      width: 96px;
-    }
+/* ===== 日にち・天気の画面 ===== */
+.sec-head {
+  background: #37474f; color: white; font-size: 24px;
+  padding: 12px 14px; border-radius: 8px 8px 0 0;
+}
+.sec-body {
+  background: white; border: 2px solid #607d8b; border-top: none;
+  border-radius: 0 0 8px 8px; padding: 14px; margin-bottom: 16px;
+}
+.cal-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.cal-arrow {
+  width: 56px; padding: 10px 0; font-size: 30px;
+  background: #eceff1; border: 2px solid #b0bec5; border-radius: 8px; cursor: pointer;
+}
+.cal-arrow:active { background: #cfd8dc; }
+.cal-month { flex: 1; text-align: center; font-size: 28px; }
 
-    /* 時間目の見出し列 */
-    .time-col {
-      background-color: #eceff1;
-      width: 96px;
-      font-size: 26px;
-      font-weight: bold;
-      line-height: 1.3;
-    }
+.cal-table { width: 100%; border-collapse: collapse; }
+.cal-table th {
+  font-size: 20px; padding: 8px 0; background: #eceff1; border: 1px solid #b0bec5;
+}
+.cal-table th.sun, .cal-table td.sun { color: #d32f2f; }
+.cal-table th.sat, .cal-table td.sat { color: #1976d2; }
+.cal-table td {
+  border: 1px solid #cfd8dc; text-align: center; height: 54px;
+  font-size: 26px; cursor: pointer;
+}
+.cal-table td.empty { background: #fafafa; cursor: default; }
+.cal-table td.today { background: #fff9c4; }
+.cal-table td.picked {
+  background: #1976d2; color: white !important;
+  outline: 3px solid #0d47a1; outline-offset: -3px;
+}
 
-    /* 時間表示（タップで編集できる） */
-    .period-time {
-      display: inline-block;
-      margin-top: 6px;
-      padding: 3px 5px;
-      font-size: 17px;
-      font-weight: normal;
-      color: #0277bd;
-      border: 1px dashed #90caf9;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    .period-time:active { background-color: #cfd8dc; }
+.weather-row { display: flex; gap: 10px; }
+.weather-card {
+  flex: 1; padding: 14px 4px; background: #e1f5fe;
+  border: 3px solid #0288d1; border-radius: 12px; cursor: pointer;
+  font-size: 20px; line-height: 1.3;
+}
+.weather-card .w-icon { display: block; font-size: 44px; margin-bottom: 4px; }
+.weather-card.picked { background: #1976d2; color: white; border-color: #0d47a1; }
 
-    /* 科目セル */
-    .subject-cell {
-      font-size: 26px;
-      line-height: 1.3;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    .subject-cell:active { background-color: #e3f2fd; }
+.preview-box {
+  background: #eceff1; border: 3px dashed #90a4ae; border-radius: 10px;
+  padding: 18px; text-align: center; font-size: 30px;
+  color: #37474f; margin-bottom: 12px; line-height: 1.4;
+}
+.today-btn {
+  width: 100%; margin-top: 10px; padding: 12px;
+  font-size: 18px; background: #eceff1; color: #455a64;
+  border: 2px solid #cfd8dc; border-radius: 8px; cursor: pointer;
+}
 
-    /* 下校時間セル */
-    .time-cell {
-      font-size: 26px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    .time-cell:active { background-color: #e3f2fd; }
+/* ===== 名前よびの画面 ===== */
+/* ===== 各画面の見出し帯（今どの項目か） ===== */
+.item-head {
+  background: #1976d2;
+  color: white;
+  font-size: 30px;
+  text-align: center;
+  padding: 14px 12px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
 
-    /* 授業がないセル（黒） */
-    .black-cell {
-      background-color: #263238;
-      cursor: default;
-    }
+/* ===== ホーム画面の「いまここ」印とチェック ===== */
+.menu-btn.now {
+  border-color: #1976d2;
+  border-width: 4px;
+  background: #e3f2fd;
+  box-shadow: 0 0 0 3px #bbdefb;
+}
+.menu-btn.now::before {
+  content: '▶ ';
+  color: #1976d2;
+}
+.menu-btn.done {
+  background: #e8f5e9;
+  border-color: #2e7d32;
+  color: #558b2f;
+}
+.menu-btn.done::after {
+  content: ' ✓';
+  color: #2e7d32;
+}
+.menu-btn.done.now { background: #e8f5e9; }
 
-    /* 給食・昼休みの行 */
-    .lunch-row td {
-      background-color: #fff9c4;
-      border: 2px solid #f9a825;
-      font-size: 26px;
-      font-weight: bold;
-      color: #f57f17;
-    }
-    .lunch-row .time-col {
-      background-color: #fff9c4;
-      color: #f57f17;
-      font-size: 20px;
-    }
+/* おわり／とりけしボタン */
+.undo-btn {
+  display: block; width: 100%; padding: 16px;
+  font-size: 22px; background: #eceff1; color: #546e7a;
+  border: 2px solid #b0bec5; border-radius: 10px;
+  cursor: pointer; margin-bottom: 12px;
+}
+.undo-btn:active { background: #cfd8dc; }
 
-    /* 「大きく見る」曜日えらびボタン */
-    .view-tabs {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
-    .view-label {
-      font-size: 16px;
-      color: #455a64;
-      font-weight: bold;
-      width: 100%;
-      margin-bottom: 2px;
-    }
-    .view-btn {
-      flex: 1;
-      min-width: 48px;
-      padding: 14px 6px;
-      font-size: 23px;
-      font-weight: bold;
-      background: #e0e0e0;
-      border: 2px solid #b0bec5;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    .view-btn.active {
-      background: #1976d2;
-      color: white;
-      border-color: #1976d2;
-    }
+/* 進みぐあい */
+.progress-box {
+  text-align: center; font-size: 18px; color: #455a64;
+  background: #eceff1; border-radius: 8px;
+  padding: 10px; margin-bottom: 14px;
+}
 
-    /* 1日だけ大きく表示するビュー（元の表を大きくした形） */
-    #singleDayView { margin-bottom: 4px; }
+.rule-num {
+  flex: 0 0 42px;
+  height: 42px;
+  line-height: 42px;
+  text-align: center;
+  background: #1976d2;
+  color: white;
+  border-radius: 50%;
+  font-size: 24px;
+}
 
-    .sd-table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border: 3px solid #37474f;
-    }
-    .sd-table th, .sd-table td {
-      border: 2px solid #607d8b;
-      text-align: center;
-      vertical-align: middle;
-      padding: 14px 6px;
-    }
+.rule-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #f5f9ff;
+  border: 3px solid #90caf9;
+  border-radius: 14px;
+  padding: 18px 16px;
+  margin-bottom: 16px;
+}
+.rule-card:last-child { margin-bottom: 0; }
+.rule-icon { flex: 0 0 110px; }
+.rule-icon svg { width: 100%; height: auto; display: block; }
+.rule-text {
+  font-size: 30px;
+  line-height: 1.5;
+  -webkit-text-stroke: 0.4px currentColor;
+}
 
-    /* 曜日の見出し */
-    .sd-th-day {
-      background: #37474f;
-      color: white;
-      font-size: 38px;
-      font-weight: 700;
-    }
-    /* 学年の見出し */
-    .sd-th-grade {
-      background: #eceff1;
-      font-size: 26px;
-      font-weight: 700;
-      width: 36%;
-    }
-    /* 左上の斜線セル */
-    .sd-th-corner {
-      width: 28%;
-      background: linear-gradient(to top right,
-        #b0bec5 0%, #b0bec5 calc(50% - 1.5px),
-        #37474f calc(50% - 1.5px), #37474f calc(50% + 1.5px),
-        #b0bec5 calc(50% + 1.5px), #b0bec5 100%);
-    }
-    /* 時間目の見出し */
-    .sd-th-time {
-      background: #eceff1;
-      font-size: 26px;
-      font-weight: 700;
-      line-height: 1.3;
-    }
-    /* 科目のマス（とても大きく） */
-    .sd-td {
-      font-size: 44px;
-      font-weight: 700;
-      line-height: 1.25;
-      -webkit-text-stroke: 0.4px currentColor;
-    }
-    /* 授業がないマス（黒） */
-    .sd-black { background: #263238; }
-    /* 給食 */
-    .sd-th-lunch, .sd-td-lunch {
-      background: #fff9c4;
-      color: #f57f17;
-    }
-    .sd-td-lunch {
-      font-size: 32px;
-      font-weight: 700;
-    }
-    .sd-time {
-      font-size: 18px;
-      color: #0277bd;
-      font-weight: 400;
-    }
+/* ===== 日直のスピーチ（タイマー・おたすけ） ===== */
+/* おたすけ（こまったときだけ 使う） */
+.help-section {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 2px dashed #b0bec5;
+}
+.help-note {
+  text-align: center;
+  font-size: 17px;
+  color: #78909c;
+  margin-bottom: 10px;
+}
+.help-btn {
+  display: block; width: 100%; padding: 14px;
+  font-size: 22px; background: #eceff1; color: #6a1b9a;
+  border: 2px solid #ce93d8; border-radius: 10px; cursor: pointer;
+}
+.help-btn:active { background: #f3e5f5; }
+.help-btn:disabled { color: #b39ddb; border-color: #e1bee7; }
 
-    .action-btn {
-      margin-top: 18px;
-      padding: 15px 20px;
-      background-color: #ff5252;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 100%;
-      font-size: 18px;
-      font-weight: bold;
-    }
+.theme-box {
+  background: #f5f9ff;
+  border: 3px solid #90caf9;
+  border-radius: 12px;
+  padding: 20px 12px;
+  text-align: center;
+  font-size: 30px;
+  line-height: 1.4;
+  color: #37474f;
+  margin-top: 12px;
+}
+.theme-box.spinning { color: #b0bec5; }
 
-    .hint {
-      margin: 14px 2px 0;
-      font-size: 14px;
-      color: #607d8b;
-      line-height: 1.6;
-    }
+.timer-wrap {
+  position: relative;
+  width: 230px;
+  max-width: 100%;
+  margin: 0 auto 16px;
+}
+.timer-svg { width: 100%; height: auto; display: block; }
+.timer-num {
+  position: absolute;
+  top: 50%; left: 0; right: 0;
+  transform: translateY(-50%);
+  text-align: center;
+  font-size: 64px;
+  color: #37474f;
+  line-height: 1;
+}
+.timer-num.over { color: #c62828; }
 
-    /* モーダル（選択画面） */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-color: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    .modal-content {
-      background-color: white;
-      padding: 25px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 460px;
-      text-align: center;
-    }
-    .modal-content h3 { font-size: 20px; margin-top: 0; }
+.stop-btn {
+  display: block; width: 100%; padding: 18px;
+  font-size: 26px; background: #c62828; color: white;
+  border: none; border-radius: 10px; cursor: pointer;
+}
+.stop-btn:active { background: #8e0000; }
 
-    .card-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      justify-content: center;
-      margin-bottom: 22px;
-    }
-    .subject-card {
-      padding: 12px 18px;
-      background-color: #e1f5fe;
-      border: 1px solid #0288d1;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 20px;
-    }
-    .custom-input-container {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 22px;
-    }
-    #customInput {
-      flex: 1;
-      padding: 12px;
-      font-size: 18px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      -webkit-user-select: auto;
-      user-select: auto;
-    }
-    .custom-btn {
-      padding: 12px 20px;
-      background-color: #4caf50;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .close-btn {
-      padding: 12px 25px;
-      background-color: #9e9e9e;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 18px;
-      font-weight: bold;
-    }
-  </style>
+.result-box {
+  background: #fff9c4;
+  border: 3px solid #f9a825;
+  border-radius: 12px;
+  padding: 18px;
+  text-align: center;
+  font-size: 26px;
+  line-height: 1.6;
+  color: #37474f;
+  margin: 14px 0 12px;
+}
+.result-time { font-size: 34px; color: #1976d2; }
+
+/* ===== 時間割の表（全体） ===== */
+.table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; }
+table#timetable {
+  border-collapse: collapse; background-color: white;
+  border: 3px solid #37474f; min-width: 760px; width: 100%;
+}
+#timetable th, #timetable td {
+  border: 2px solid #607d8b; text-align: center; vertical-align: middle;
+  padding: 8px 4px; height: 74px; -webkit-text-stroke: 0.3px currentColor;
+}
+.day-header { background-color: #cfd8dc; font-size: 30px; cursor: pointer; }
+.day-header:active { background-color: #b0bec5; }
+.grade-header { background-color: #eceff1; font-size: 24px; width: 66px; cursor: pointer; }
+.grade-header:active { background-color: #cfd8dc; }
+.corner-cell {
+  width: 96px;
+  background: linear-gradient(to top right,
+    #b0bec5 0%, #b0bec5 calc(50% - 1.5px),
+    #37474f calc(50% - 1.5px), #37474f calc(50% + 1.5px),
+    #b0bec5 calc(50% + 1.5px), #b0bec5 100%);
+}
+.time-col { background-color: #eceff1; width: 96px; font-size: 26px; line-height: 1.3; }
+.period-time {
+  display: inline-block; margin-top: 6px; padding: 3px 5px;
+  font-size: 17px; font-weight: 400; color: #0277bd;
+  border: 1px dashed #90caf9; border-radius: 5px; cursor: pointer;
+}
+.period-time:active { background-color: #cfd8dc; }
+.subject-cell { font-size: 26px; line-height: 1.3; cursor: pointer; }
+.subject-cell:active { background-color: #e3f2fd; }
+.time-cell { font-size: 26px; cursor: pointer; }
+.time-cell:active { background-color: #e3f2fd; }
+.black-cell { background-color: #263238; cursor: default; }
+.lunch-row td { background-color: #fff9c4; border: 2px solid #f9a825; font-size: 26px; color: #f57f17; }
+.lunch-row .time-col { background-color: #fff9c4; color: #f57f17; font-size: 20px; }
+
+/* ===== 1日だけ大きく表示する表 ===== */
+.sd-table { width: 100%; border-collapse: collapse; background: white; border: 3px solid #37474f; }
+.sd-table th, .sd-table td {
+  border: 2px solid #607d8b; text-align: center; vertical-align: middle; padding: 14px 6px;
+}
+.sd-th-day { background: #37474f; color: white; font-size: 38px; }
+.sd-th-grade { background: #eceff1; font-size: 26px; width: 36%; }
+.sd-th-corner {
+  width: 28%;
+  background: linear-gradient(to top right,
+    #b0bec5 0%, #b0bec5 calc(50% - 1.5px),
+    #37474f calc(50% - 1.5px), #37474f calc(50% + 1.5px),
+    #b0bec5 calc(50% + 1.5px), #b0bec5 100%);
+}
+.sd-th-time { background: #eceff1; font-size: 26px; line-height: 1.3; }
+.sd-td { font-size: 44px; line-height: 1.25; cursor: pointer; -webkit-text-stroke: 0.4px currentColor; }
+.sd-td:active { background: #e3f2fd; }
+.sd-black { background: #263238; cursor: default; }
+.sd-th-lunch, .sd-td-lunch { background: #fff9c4; color: #f57f17; }
+.sd-td-lunch { font-size: 32px; }
+.sd-time { font-size: 18px; color: #0277bd; font-weight: 400; }
+
+/* ===== 選択・入力のポップアップ ===== */
+.modal {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;
+}
+.modal-content {
+  background-color: white; padding: 25px; border-radius: 12px;
+  width: 90%; max-width: 460px; text-align: center;
+}
+.modal-content h3 { font-size: 20px; margin-top: 0; }
+.card-container { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 22px; }
+.subject-card {
+  padding: 12px 18px; background-color: #e1f5fe; border: 1px solid #0288d1;
+  border-radius: 8px; cursor: pointer; font-size: 20px;
+}
+.merge-btn {
+  display: block; width: 100%; padding: 14px;
+  margin-bottom: 18px;
+  font-size: 20px; background: #ede7f6; color: #4527a0;
+  border: 2px solid #9575cd; border-radius: 10px; cursor: pointer;
+}
+.merge-btn:active { background: #d1c4e9; }
+.none-card {
+  background: #eceff1 !important;
+  border-color: #90a4ae !important;
+  color: #546e7a;
+}
+
+.custom-input-container { display: flex; gap: 10px; margin-bottom: 22px; }
+#customInput {
+  flex: 1; padding: 12px; font-size: 18px; border: 1px solid #ccc;
+  border-radius: 8px; -webkit-user-select: auto; user-select: auto;
+}
+.custom-btn { padding: 12px 20px; background-color: #4caf50; color: white; border: none; border-radius: 8px; font-size: 18px; }
+.close-btn { padding: 12px 25px; background-color: #9e9e9e; color: white; border: none; border-radius: 8px; font-size: 18px; }
+</style>
 </head>
 <body>
 
-<div class="view-tabs">
-  <span class="view-label"><ruby>大<rt>おお</rt></ruby>きく<ruby>見<rt>み</rt></ruby>たい<ruby>曜日<rt>ようび</rt></ruby>をえらべます</span>
-  <button class="view-btn" data-day="0"><ruby>月<rt>げつ</rt></ruby></button>
-  <button class="view-btn" data-day="1"><ruby>火<rt>か</rt></ruby></button>
-  <button class="view-btn" data-day="2"><ruby>水<rt>すい</rt></ruby></button>
-  <button class="view-btn" data-day="3"><ruby>木<rt>もく</rt></ruby></button>
-  <button class="view-btn" data-day="4"><ruby>金<rt>きん</rt></ruby></button>
-  <button class="view-btn active" data-day="all"><ruby>全部<rt>ぜんぶ</rt></ruby></button>
+<!-- ========== ホーム画面 ========== -->
+<div id="homeView">
+  <div class="home-title">あさのかい</div>
+  <div class="progress-box" id="progressBox"></div>
+
+  <button class="menu-btn" id="item1Btn" data-item="1">
+    <span class="num">1.</span><span id="item1Label"><ruby>日<rt>ひ</rt></ruby>にち・<ruby>曜日<rt>ようび</rt></ruby>・<ruby>天気<rt>てんき</rt></ruby></span>
+  </button>
+  <button class="menu-btn" id="item2Btn" data-item="2">
+    <span class="num">2.</span><ruby>名前<rt>なまえ</rt></ruby>よび
+  </button>
+  <button class="menu-btn" data-item="3">
+    <span class="num">3.</span><ruby>今日<rt>きょう</rt></ruby>のよてい
+  </button>
+  <button class="menu-btn" data-item="4">
+    <span class="num">4.</span><ruby>給食<rt>きゅうしょく</rt></ruby>
+  </button>
+  <button class="menu-btn" data-item="5">
+    <span class="num">5.</span><ruby>帰<rt>かえ</rt></ruby>りのかくにん
+  </button>
+  <button class="menu-btn" data-item="6">
+    <span class="num">6.</span><ruby>先生<rt>せんせい</rt></ruby>の<ruby>話<rt>はなし</rt></ruby>
+  </button>
+  <button class="menu-btn" data-item="7">
+    <span class="num">7.</span><ruby>日直<rt>にっちょく</rt></ruby>のスピーチ
+  </button>
+
+  <button class="teacher-link" id="teacherLink">⚙ せんせい（じゅんび）</button>
 </div>
 
-<div id="singleDayView" style="display:none;"></div>
-
-<div class="table-wrapper">
-  <table id="timetable">
-    <thead>
-      <tr>
-        <th class="corner-cell" rowspan="2"></th>
-        <th class="day-header" colspan="2"><ruby>月<rt>げつ</rt></ruby></th>
-        <th class="day-header" colspan="2"><ruby>火<rt>か</rt></ruby></th>
-        <th class="day-header" colspan="2"><ruby>水<rt>すい</rt></ruby></th>
-        <th class="day-header" colspan="2"><ruby>木<rt>もく</rt></ruby></th>
-        <th class="day-header" colspan="2"><ruby>金<rt>きん</rt></ruby></th>
-      </tr>
-      <tr>
-        <th class="grade-header">3</th>
-        <th class="grade-header">4</th>
-        <th class="grade-header">3</th>
-        <th class="grade-header">4</th>
-        <th class="grade-header">3</th>
-        <th class="grade-header">4</th>
-        <th class="grade-header">3</th>
-        <th class="grade-header">4</th>
-        <th class="grade-header">3</th>
-        <th class="grade-header">4</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- 1時間目 -->
-      <tr>
-        <th class="time-col">1<br><span class="period-time">9:40-10:25</span></th>
-        <td colspan="2" class="subject-cell"><ruby>体育<rt>たいいく</rt></ruby></td>
-        <td colspan="2" class="subject-cell"><ruby>国語<rt>こくご</rt></ruby></td>
-        <td class="subject-cell"><ruby>音楽<rt>おんがく</rt></ruby></td>
-        <td class="subject-cell"><ruby>図工<rt>ずこう</rt></ruby></td>
-        <td class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby><br>(プール)</td>
-        <td class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby></td>
-        <td colspan="2" class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby></td>
-      </tr>
-
-      <!-- 2時間目 -->
-      <tr>
-        <th class="time-col">2<br><span class="period-time">10:40-11:25</span></th>
-        <td colspan="2" class="subject-cell"><ruby>算数<rt>さんすう</rt></ruby></td>
-        <td class="subject-cell">POS</td>
-        <td class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby></td>
-        <td class="subject-cell"><ruby>図工<rt>ずこう</rt></ruby></td>
-        <td class="subject-cell"><ruby>音楽<rt>おんがく</rt></ruby></td>
-        <td class="subject-cell"><ruby>生単<rt>せいたん</rt></ruby></td>
-        <td class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby><br>(プール)</td>
-        <td colspan="2" class="subject-cell"><ruby>生単<rt>せいたん</rt></ruby></td>
-      </tr>
-
-      <!-- 給食・昼休み -->
-      <tr class="lunch-row">
-        <th class="time-col"><ruby>給食<rt>きゅうしょく</rt></ruby></th>
-        <td colspan="10"><ruby>給食<rt>きゅうしょく</rt></ruby>・<ruby>昼休<rt>ひるやす</rt></ruby>み</td>
-      </tr>
-
-      <!-- 3時間目 -->
-      <tr>
-        <th class="time-col">3<br><span class="period-time">13:20-14:05</span></th>
-        <td class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby></td>
-        <td class="subject-cell"><ruby>生単<rt>せいたん</rt></ruby></td>
-        <td colspan="2" class="subject-cell"><ruby>生単<rt>せいたん</rt></ruby></td>
-        <td colspan="2" class="subject-cell"><ruby>国語<rt>こくご</rt></ruby></td>
-        <td colspan="2" class="subject-cell"><ruby>総合<rt>そうごう</rt></ruby></td>
-        <td colspan="2" class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby></td>
-      </tr>
-
-      <!-- 4時間目 -->
-      <tr>
-        <th class="time-col">4<br><span class="period-time">14:10-14:55</span></th>
-        <td class="black-cell"></td>
-        <td class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby><br>(POS)</td>
-        <td class="subject-cell"><ruby>生単<rt>せいたん</rt></ruby></td>
-        <td class="subject-cell">POS</td>
-        <td colspan="2" class="black-cell"></td>
-        <td class="black-cell"></td>
-        <td class="subject-cell"><ruby>自立<rt>じりつ</rt></ruby></td>
-        <td colspan="2" class="black-cell"></td>
-      </tr>
-
-      <!-- 下校 -->
-      <tr class="dismissal-row">
-        <th class="time-col"><ruby>下校<rt>げこう</rt></ruby></th>
-        <td class="time-cell">14:00</td>
-        <td class="time-cell">15:30</td>
-        <td colspan="2" class="time-cell">15:30</td>
-        <td colspan="2" class="time-cell">14:00</td>
-        <td colspan="2" class="time-cell">15:30</td>
-        <td colspan="2" class="time-cell">14:00</td>
-      </tr>
-    </tbody>
-  </table>
+<!-- ========== 準備中の画面 ========== -->
+<div id="soonView" style="display:none;">
+  <button class="back-btn back-home">← あさのかいに もどる</button>
+  <div class="item-head"></div>
+  <div class="soon-box">
+    <div class="soon-text">この がめんは<br>これから つくります。</div>
+  </div>
+  <button class="show-btn item-done" id="soonDoneBtn" style="margin-top:14px;">✓ おわり</button>
+  <button class="undo-btn item-undo" id="soonUndoBtn" style="display:none;">↩ おわりを とりけす</button>
 </div>
 
-<p class="hint">
-  ※ <ruby>曜日<rt>ようび</rt></ruby>・<ruby>学年<rt>がくねん</rt></ruby>・<ruby>科目<rt>かもく</rt></ruby>・<ruby>時間<rt>じかん</rt></ruby>・<ruby>下校<rt>げこう</rt></ruby>は、タップして<ruby>編集<rt>へんしゅう</rt></ruby>できます。
-</p>
+<!-- ========== 日にち・曜日・天気の画面 ========== -->
+<div id="dateView" style="display:none;">
+  <button class="back-btn back-home">← あさのかいに もどる</button>
+  <div class="item-head"></div>
 
-<button id="resetBtn" class="action-btn"><ruby>変更<rt>へんこう</rt></ruby>を<ruby>初期化<rt>しょきか</rt></ruby>する</button>
+  <div class="sec-head">① <ruby>日<rt>ひ</rt></ruby>にちを えらぶ</div>
+  <div class="sec-body">
+    <div class="cal-nav">
+      <button class="cal-arrow" id="prevMonth">‹</button>
+      <div class="cal-month" id="calMonthLabel"></div>
+      <button class="cal-arrow" id="nextMonth">›</button>
+    </div>
+    <table class="cal-table" id="calTable"></table>
+    <button class="today-btn" id="todayBtn">きょうに もどす</button>
+  </div>
 
+  <div class="sec-head">② <ruby>天気<rt>てんき</rt></ruby>を えらぶ</div>
+  <div class="sec-body">
+    <div class="weather-row" id="weatherRow"></div>
+  </div>
+
+  <div class="preview-box" id="previewBox">えらんでください</div>
+  <button class="show-btn item-done" id="decideBtn" data-item="1">✓ これにして おわり</button>
+  <button class="undo-btn item-undo" data-item="1" style="display:none;">↩ おわりを とりけす</button>
+</div>
+
+<!-- ========== ポイントの画面（2・4・5で共通） ========== -->
+<div id="pointsView" style="display:none;">
+  <button class="back-btn back-home">← あさのかいに もどる</button>
+  <div class="item-head"></div>
+
+  <div class="sec-head">ポイント</div>
+  <div class="sec-body">
+
+    <!-- ① 相手の目を見る -->
+    <div class="rule-card">
+      <div class="rule-num">1</div>
+      <div class="rule-icon">
+        <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg"
+             fill="none" stroke="#37474f" stroke-width="3.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="27" cy="40" r="20"/>
+          <circle cx="20" cy="35" r="2.8" fill="#37474f" stroke="none"/>
+          <circle cx="34" cy="35" r="2.8" fill="#37474f" stroke="none"/>
+          <path d="M21 49 Q27 53 33 49"/>
+          <circle cx="93" cy="40" r="20"/>
+          <circle cx="86" cy="35" r="2.8" fill="#37474f" stroke="none"/>
+          <circle cx="100" cy="35" r="2.8" fill="#37474f" stroke="none"/>
+          <path d="M87 49 Q93 53 99 49"/>
+          <line x1="41" y1="35" x2="79" y2="35" stroke="#1976d2" stroke-dasharray="5 4"/>
+          <path d="M45 31 L40 35 L45 39" stroke="#1976d2"/>
+          <path d="M75 31 L80 35 L75 39" stroke="#1976d2"/>
+        </svg>
+      </div>
+      <div class="rule-text">
+        <ruby>相手<rt>あいて</rt></ruby>の<ruby>目<rt>め</rt></ruby>を<ruby>見<rt>み</rt></ruby>る
+      </div>
+    </div>
+
+    <!-- ② 大きな声 -->
+    <div class="rule-card">
+      <div class="rule-num">2</div>
+      <div class="rule-icon">
+        <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg"
+             fill="none" stroke="#37474f" stroke-width="3.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="38" cy="40" r="22"/>
+          <circle cx="31" cy="34" r="2.8" fill="#37474f" stroke="none"/>
+          <circle cx="45" cy="34" r="2.8" fill="#37474f" stroke="none"/>
+          <ellipse cx="38" cy="49" rx="9" ry="8" fill="#37474f" stroke="none"/>
+          <path d="M68 30 Q76 40 68 50" stroke="#1976d2"/>
+          <path d="M80 22 Q92 40 80 58" stroke="#1976d2"/>
+          <path d="M92 14 Q108 40 92 66" stroke="#1976d2"/>
+        </svg>
+      </div>
+      <div class="rule-text">
+        <ruby>大<rt>おお</rt></ruby>きな<ruby>声<rt>こえ</rt></ruby>
+      </div>
+    </div>
+
+    <!-- ③ 聞きやすいはやさ -->
+    <div class="rule-card">
+      <div class="rule-num">3</div>
+      <div class="rule-icon">
+        <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg"
+             fill="none" stroke="#37474f" stroke-width="3.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="28" cy="40" r="19"/>
+          <circle cx="22" cy="35" r="2.6" fill="#37474f" stroke="none"/>
+          <circle cx="34" cy="35" r="2.6" fill="#37474f" stroke="none"/>
+          <ellipse cx="28" cy="48" rx="6" ry="5" fill="#37474f" stroke="none"/>
+          <!-- 等しい間かくの3つ＝ゆっくり一定のはやさ -->
+          <circle cx="66" cy="40" r="6" stroke="#1976d2"/>
+          <circle cx="88" cy="40" r="6" stroke="#1976d2"/>
+          <circle cx="110" cy="40" r="6" stroke="#1976d2"/>
+          <line x1="73" y1="40" x2="81" y2="40" stroke="#1976d2" stroke-dasharray="3 3"/>
+          <line x1="95" y1="40" x2="103" y2="40" stroke="#1976d2" stroke-dasharray="3 3"/>
+        </svg>
+      </div>
+      <div class="rule-text">
+        <ruby>聞<rt>き</rt></ruby>きやすい はやさ
+      </div>
+    </div>
+
+  </div>
+
+  <button class="show-btn item-done" id="pointsDoneBtn">✓ おわり</button>
+  <button class="undo-btn item-undo" id="pointsUndoBtn" style="display:none;">↩ おわりを とりけす</button>
+</div>
+
+<!-- ========== 先生の話の画面（6） ========== -->
+<div id="listenView" style="display:none;">
+  <button class="back-btn back-home">← あさのかいに もどる</button>
+  <div class="item-head"></div>
+
+  <div class="sec-head">ポイント</div>
+  <div class="sec-body">
+
+    <!-- ① さいごまで 聞く -->
+    <div class="rule-card">
+      <div class="rule-num">1</div>
+      <div class="rule-icon">
+        <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg"
+             fill="none" stroke="#37474f" stroke-width="3.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <!-- 話している人 -->
+          <circle cx="20" cy="42" r="15"/>
+          <circle cx="15" cy="38" r="2.2" fill="#37474f" stroke="none"/>
+          <circle cx="25" cy="38" r="2.2" fill="#37474f" stroke="none"/>
+          <ellipse cx="20" cy="48" rx="5" ry="4.5" fill="#37474f" stroke="none"/>
+          <!-- ことばが ゴールまで つづく -->
+          <line x1="38" y1="42" x2="86" y2="42" stroke="#1976d2" stroke-dasharray="6 5"/>
+          <!-- ゴールの旗 -->
+          <line x1="88" y1="42" x2="88" y2="10"/>
+          <path d="M88 12 H110 L104 20 L110 28 H88" fill="#1976d2" stroke="#1976d2"/>
+          <circle cx="88" cy="44" r="4" fill="#37474f" stroke="none"/>
+        </svg>
+      </div>
+      <div class="rule-text">
+        さいごまで <ruby>聞<rt>き</rt></ruby>く
+      </div>
+    </div>
+
+    <!-- ② しずかに 聞く -->
+    <div class="rule-card">
+      <div class="rule-num">2</div>
+      <div class="rule-icon">
+        <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg"
+             fill="none" stroke="#37474f" stroke-width="3.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <!-- 音符 -->
+          <ellipse cx="46" cy="58" rx="11" ry="8.5" fill="#37474f" stroke="none"/>
+          <line x1="57" y1="58" x2="57" y2="18"/>
+          <path d="M57 18 Q76 24 74 40"/>
+          <!-- 斜線（音を出さない） -->
+          <line x1="26" y1="70" x2="96" y2="12" stroke="#1976d2" stroke-width="6"/>
+        </svg>
+      </div>
+      <div class="rule-text">
+        しずかに <ruby>聞<rt>き</rt></ruby>く
+      </div>
+    </div>
+
+    <!-- ③ 手はひざに -->
+    <div class="rule-card">
+      <div class="rule-num">3</div>
+      <div class="rule-icon">
+        <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg"
+             fill="none" stroke="#37474f" stroke-width="3.5"
+             stroke-linecap="round" stroke-linejoin="round">
+          <!-- すわっている ようす（よこから見た形） -->
+          <circle cx="42" cy="18" r="12"/>
+          <line x1="42" y1="30" x2="42" y2="54"/>
+          <line x1="42" y1="54" x2="76" y2="54"/>
+          <line x1="76" y1="54" x2="76" y2="72"/>
+          <!-- うで と ひざの上の手 -->
+          <path d="M42 38 Q58 42 70 50" stroke="#1976d2"/>
+          <circle cx="72" cy="51" r="5" fill="#1976d2" stroke="none"/>
+        </svg>
+      </div>
+      <div class="rule-text">
+        <ruby>手<rt>て</rt></ruby>は ひざに
+      </div>
+    </div>
+
+  </div>
+
+  <button class="show-btn item-done" data-item="6">✓ おわり</button>
+  <button class="undo-btn item-undo" data-item="6" style="display:none;">↩ おわりを とりけす</button>
+</div>
+
+<!-- ========== 日直のスピーチの画面（7） ========== -->
+<div id="speechView" style="display:none;">
+  <button class="back-btn back-home">← あさのかいに もどる</button>
+  <div class="item-head"></div>
+
+  <!-- タイマー（こちらが中心） -->
+  <div class="sec-head">1<ruby>分間<rt>ぷんかん</rt></ruby> タイマー</div>
+  <div class="sec-body">
+    <div class="timer-wrap">
+      <svg class="timer-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="100" cy="100" r="80" fill="none" stroke="#e0e0e0" stroke-width="18"/>
+        <circle id="timerRing" cx="100" cy="100" r="80" fill="none" stroke="#2e7d32"
+                stroke-width="18" stroke-linecap="round"
+                transform="rotate(-90 100 100) scale(1,-1) translate(0,-200)"
+                stroke-dasharray="502.65" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-num" id="timerNum">60</div>
+    </div>
+
+    <button class="show-btn" id="startBtn">▶ スタート</button>
+    <button class="stop-btn" id="stopBtn" style="display:none;">■ おわり</button>
+    <div class="result-box" id="resultBox" style="display:none;"></div>
+    <button class="undo-btn" id="againBtn" style="display:none;">↩ もういちど</button>
+  </div>
+
+  <button class="show-btn item-done" data-item="7">✓ おわり</button>
+  <button class="undo-btn item-undo" data-item="7" style="display:none;">↩ おわりを とりけす</button>
+
+  <!-- おたすけ（こまったときだけ 使う） -->
+  <div class="help-section">
+    <div class="help-note">
+      <ruby>話<rt>はな</rt></ruby>すことが きまらないときは、こちら
+    </div>
+    <button class="help-btn" id="helpBtn">🎲 おたすけ</button>
+    <div class="theme-box" id="themeBox" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ========== 時間割の画面（子ども用） ========== -->
+<div id="scheduleView" style="display:none;">
+  <button class="back-btn back-home">← あさのかいに もどる</button>
+  <div class="item-head"></div>
+  <div id="scheduleContent"></div>
+  <button class="show-btn item-done" data-item="3" style="margin-top:14px;">✓ <ruby>今日<rt>きょう</rt></ruby>のよてい おわり</button>
+  <button class="undo-btn item-undo" data-item="3" style="display:none;">↩ おわりを とりけす</button>
+</div>
+
+<!-- ========== 先生用の設定画面 ========== -->
+<div id="teacherView" style="display:none;">
+  <button class="back-btn back-home">← あさのかいに もどる</button>
+
+  <div class="teacher-head">せんせい用　じゅんびの がめん</div>
+  <div class="teacher-body">
+    <div class="step-label">① 見せたい曜日をえらぶ</div>
+    <div class="view-tabs">
+      <button class="view-btn" data-day="0"><ruby>月<rt>げつ</rt></ruby></button>
+      <button class="view-btn" data-day="1"><ruby>火<rt>か</rt></ruby></button>
+      <button class="view-btn" data-day="2"><ruby>水<rt>すい</rt></ruby></button>
+      <button class="view-btn" data-day="3"><ruby>木<rt>もく</rt></ruby></button>
+      <button class="view-btn" data-day="4"><ruby>金<rt>きん</rt></ruby></button>
+      <button class="view-btn active" data-day="all">全部</button>
+    </div>
+    <div class="step-label">② 下の表をタップして、今日の予定に直す</div>
+    <div class="step-label">③ できたら「この画面を出す」を押す</div>
+  </div>
+
+  <button class="show-btn" id="showBtn">✓ この<ruby>画面<rt>がめん</rt></ruby>を<ruby>出<rt>だ</rt></ruby>す</button>
+
+  <div id="teacherTableSlot"></div>
+
+  <p class="hint">※ 曜日・学年・科目・時間・下校時間は、タップして変更できます。<br>
+  ※ マスをタップすると「3・4を いっしょにする／わける」も えらべます。</p>
+  <button id="resetTableBtn" class="show-btn" style="background:#0277bd; margin-top:14px;">
+    ↩ 時間割を きほんの形に もどす
+  </button>
+  <button id="resetChecksBtn" class="show-btn" style="background:#f57c00; margin-top:10px;">
+    🔄 あさのかいの チェックを ぜんぶ消す
+  </button>
+  <button id="resetBtn" class="action-btn" style="margin-top:10px;">変更を初期化する</button>
+</div>
+
+<!-- ========== 時間割の表（本体：中身はJavaScriptが作ります） ========== -->
+<div class="table-wrapper" id="tableWrapper">
+  <table id="timetable"></table>
+</div>
+
+<!-- ========== 選択・入力のポップアップ ========== -->
 <div id="cardModal" class="modal">
   <div class="modal-content">
-    <h3 id="modalTitle"><ruby>選択<rt>せんたく</rt></ruby>・<ruby>入力<rt>にゅうりょく</rt></ruby></h3>
+    <h3 id="modalTitle">選択・入力</h3>
+    <div id="mergeSlot"></div>
     <div id="cardContainer" class="card-container"></div>
     <div class="custom-input-container">
       <input type="text" id="customInput" placeholder="直接入力できます">
       <button id="customSubmitBtn" class="custom-btn">決定</button>
     </div>
-    <button id="closeModalBtn" class="close-btn"><ruby>閉<rt>と</rt></ruby>じる</button>
+    <button id="closeModalBtn" class="close-btn">閉じる</button>
   </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const editables = document.querySelectorAll(
-    '.subject-cell, .time-cell, .day-header, .grade-header, .period-time'
-  );
+  const homeView = document.getElementById('homeView');
+  const soonView = document.getElementById('soonView');
+  const scheduleView = document.getElementById('scheduleView');
+  const teacherView = document.getElementById('teacherView');
+  const dateView = document.getElementById('dateView');
+  const pointsView = document.getElementById('pointsView');
+  const listenView = document.getElementById('listenView');
+  const speechView = document.getElementById('speechView');
+  const scheduleContent = document.getElementById('scheduleContent');
+  const teacherTableSlot = document.getElementById('teacherTableSlot');
+  const tableWrapper = document.getElementById('tableWrapper');
+
   const modal = document.getElementById('cardModal');
   const cardContainer = document.getElementById('cardContainer');
   const customInput = document.getElementById('customInput');
   const customSubmitBtn = document.getElementById('customSubmitBtn');
-  const resetBtn = document.getElementById('resetBtn');
   const closeModalBtn = document.getElementById('closeModalBtn');
   const modalTitle = document.getElementById('modalTitle');
+  const mergeSlot = document.getElementById('mergeSlot');
+  const resetBtn = document.getElementById('resetBtn');
 
-  let currentTargetEl = null;
+  // 先生が「この画面を出す」で決めた曜日（'all' または 0〜4）
+  let selectedDay = 'all';
+  // 設定画面で今えらんでいる曜日
+  let pickingDay = 'all';
+  // 今どの画面にいるか
+  let currentView = 'home';
 
-  const subjectCards = [
-    '<ruby>体育<rt>たいいく</rt></ruby>',
-    '<ruby>国語<rt>こくご</rt></ruby>',
-    '<ruby>算数<rt>さんすう</rt></ruby>',
-    '<ruby>音楽<rt>おんがく</rt></ruby>',
-    '<ruby>図工<rt>ずこう</rt></ruby>',
-    '<ruby>生単<rt>せいたん</rt></ruby>',
-    '<ruby>総合<rt>そうごう</rt></ruby>',
-    '<ruby>自立<rt>じりつ</rt></ruby>',
-    '<ruby>自立<rt>じりつ</rt></ruby><br>(プール)',
-    '<ruby>自立<rt>じりつ</rt></ruby><br>(POS)',
-    'POS'
-  ];
-
-  const timeCards = ['11:30', '13:00', '14:00', '14:30', '15:00', '15:30'];
-
-  const periodTimeCards = ['9:40-10:25', '10:40-11:25', '13:20-14:05', '14:10-14:55'];
-
-  const dayCards = [
-    '<ruby>月<rt>げつ</rt></ruby>',
-    '<ruby>火<rt>か</rt></ruby>',
-    '<ruby>水<rt>すい</rt></ruby>',
-    '<ruby>木<rt>もく</rt></ruby>',
-    '<ruby>金<rt>きん</rt></ruby>'
-  ];
-
-  const gradeCards = ['1', '2', '3', '4', '5', '6'];
-
-  function showCards(cards) {
-    cardContainer.style.display = 'flex';
-    cards.forEach(cardHtml => {
-      const btn = document.createElement('button');
-      btn.className = 'subject-card';
-      btn.innerHTML = cardHtml;
-      btn.addEventListener('click', () => updateCell(cardHtml));
-      cardContainer.appendChild(btn);
-    });
+  /* ===== 画面の切りかえ ===== */
+  function showView(name) {
+    currentView = name;
+    homeView.style.display = (name === 'home') ? 'block' : 'none';
+    soonView.style.display = (name === 'soon') ? 'block' : 'none';
+    scheduleView.style.display = (name === 'schedule') ? 'block' : 'none';
+    teacherView.style.display = (name === 'teacher') ? 'block' : 'none';
+    dateView.style.display = (name === 'date') ? 'block' : 'none';
+    pointsView.style.display = (name === 'points') ? 'block' : 'none';
+    listenView.style.display = (name === 'listen') ? 'block' : 'none';
+    speechView.style.display = (name === 'speech') ? 'block' : 'none';
+    // スピーチの画面をはなれたら、うごいているタイマーを止める
+    if (name !== 'speech' && timerId) { clearInterval(timerId); timerId = null; }
+    if (name !== 'schedule' && name !== 'teacher') tableWrapper.style.display = 'none';
+    window.scrollTo(0, 0);
   }
 
-  editables.forEach(el => {
-    el.addEventListener('click', () => {
-      if (el.classList.contains('black-cell')) return;
+  /* ===== 項目の共通の仕組み ===== */
+  // 各項目の番号と名前（ふりがな付き）
+  const ITEMS = {
+    '1': '<ruby>日<rt>ひ</rt></ruby>にち・<ruby>曜日<rt>ようび</rt></ruby>・<ruby>天気<rt>てんき</rt></ruby>',
+    '2': '<ruby>名前<rt>なまえ</rt></ruby>よび',
+    '3': '<ruby>今日<rt>きょう</rt></ruby>のよてい',
+    '4': '<ruby>給食<rt>きゅうしょく</rt></ruby>',
+    '5': '<ruby>帰<rt>かえ</rt></ruby>りのかくにん',
+    '6': '<ruby>先生<rt>せんせい</rt></ruby>の<ruby>話<rt>はなし</rt></ruby>',
+    '7': '<ruby>日直<rt>にっちょく</rt></ruby>のスピーチ'
+  };
 
-      currentTargetEl = el;
-      cardContainer.innerHTML = '';
-      customInput.value = '';
+  const doneItems = new Set();   // おわった項目
+  let openItem = null;           // 今ひらいている項目の番号
 
-      if (el.classList.contains('day-header')) {
-        modalTitle.textContent = '曜日を選んでください';
-        showCards(dayCards);
-      } else if (el.classList.contains('grade-header')) {
-        modalTitle.textContent = '学年を選んでください';
-        showCards(gradeCards);
-      } else if (el.classList.contains('period-time')) {
-        modalTitle.textContent = '時間を選んでください';
-        showCards(periodTimeCards);
-      } else if (el.classList.contains('time-cell')) {
-        modalTitle.textContent = '下校時間を選んでください';
-        showCards(timeCards);
-      } else if (el.classList.contains('subject-cell')) {
-        modalTitle.textContent = '科目を選んでください';
-        showCards(subjectCards);
+  // 画面の上に「2. 名前よび」の見出しを出す
+  function setItemHead(view, num) {
+    const head = view.querySelector('.item-head');
+    if (head) head.innerHTML = num + '. ' + ITEMS[num];
+  }
+
+  // その画面の「おわり」「とりけす」ボタンの出しわけ
+  function setDoneButtons(view, num) {
+    const doneBtn = view.querySelector('.item-done');
+    const undoBtn = view.querySelector('.item-undo');
+    const isDone = doneItems.has(num);
+    if (doneBtn) doneBtn.style.display = isDone ? 'none' : 'block';
+    if (undoBtn) undoBtn.style.display = isDone ? 'block' : 'none';
+  }
+
+  // ホーム画面のチェックと「いまここ」印を付け直す
+  function refreshHome() {
+    const btns = document.querySelectorAll('.menu-btn');
+    let nowSet = false;
+    btns.forEach(btn => {
+      const num = btn.getAttribute('data-item');
+      btn.classList.toggle('done', doneItems.has(num));
+      btn.classList.remove('now');
+      // まだ終わっていない一番上の項目に「▶ いまここ」を付ける
+      if (!nowSet && !doneItems.has(num)) {
+        btn.classList.add('now');
+        nowSet = true;
       }
+    });
+    const box = document.getElementById('progressBox');
+    if (box) box.textContent = '7つのうち ' + doneItems.size + 'つ おわりました';
+  }
 
-      modal.style.display = 'flex';
+  function markDone(num) {
+    doneItems.add(num);
+    refreshHome();
+    showView('home');
+  }
+
+  function markUndone(num) {
+    doneItems.delete(num);
+    refreshHome();
+    showView('home');
+  }
+
+  // 「おわり」「とりけす」ボタンの共通の動き
+  document.querySelectorAll('.item-done').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const num = btn.getAttribute('data-item') || openItem;
+      if (num === '1') {
+        if (!buildLabel()) return;   // 日づけがえらばれていなければ何もしない
+        applyDateLabel();
+      }
+      markDone(num);
+    });
+  });
+  document.querySelectorAll('.item-undo').forEach(btn => {
+    btn.addEventListener('click', () => {
+      markUndone(btn.getAttribute('data-item') || openItem);
     });
   });
 
-  function updateCell(content) {
-    if (currentTargetEl) currentTargetEl.innerHTML = content;
-    closeModal();
-  }
-
-  function closeModal() {
-    modal.style.display = 'none';
-    currentTargetEl = null;
-  }
-
-  customSubmitBtn.addEventListener('click', () => {
-    const val = customInput.value.trim();
-    if (val !== '') updateCell(val);
+  // ホームの項目
+  document.querySelectorAll('.menu-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.getAttribute('data-item');
+      openItem = item;
+      if (item === '3') {
+        openSchedule();
+        setItemHead(scheduleView, item);
+        setDoneButtons(scheduleView, item);
+      } else if (item === '1') {
+        openDateView();
+        setItemHead(dateView, item);
+        setDoneButtons(dateView, item);
+      } else if (item === '2' || item === '4' || item === '5') {
+        setItemHead(pointsView, item);
+        pointsView.querySelector('.item-done').setAttribute('data-item', item);
+        pointsView.querySelector('.item-undo').setAttribute('data-item', item);
+        setDoneButtons(pointsView, item);
+        showView('points');
+      } else if (item === '6') {
+        setItemHead(listenView, item);
+        setDoneButtons(listenView, item);
+        showView('listen');
+      } else if (item === '7') {
+        setItemHead(speechView, item);
+        setDoneButtons(speechView, item);
+        resetTimer();
+        showView('speech');
+      } else {
+        setItemHead(soonView, item);
+        soonView.querySelector('.item-done').setAttribute('data-item', item);
+        soonView.querySelector('.item-undo').setAttribute('data-item', item);
+        setDoneButtons(soonView, item);
+        showView('soon');
+      }
+    });
   });
 
-  closeModalBtn.addEventListener('click', closeModal);
-
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
+  document.querySelectorAll('.back-home').forEach(b => {
+    b.addEventListener('click', () => showView('home'));
   });
 
-  // === 1日だけ大きく表示する機能 ===
+  document.getElementById('teacherLink').addEventListener('click', () => {
+    pickingDay = selectedDay;
+    updateViewBtns();
+    renderTeacherTable();
+    showView('teacher');
+  });
+
+  /* ===== 先生用の設定画面 ===== */
   const viewBtns = document.querySelectorAll('.view-btn');
-  const tableWrapper = document.querySelector('.table-wrapper');
-  const singleDayView = document.getElementById('singleDayView');
-  const dayHeaders = document.querySelectorAll('.day-header');
 
-  const gradeHeaders = document.querySelectorAll('.grade-header');
-
-  // 1マス分のHTMLを作る（黒いマス＝授業なしはそのまま黒で表示）
-  function renderCell(td, attr) {
-    if (!td || td.classList.contains('black-cell')) {
-      return '<td class="sd-td sd-black" ' + attr + '></td>';
-    }
-    return '<td class="sd-td" ' + attr + '>' + td.innerHTML + '</td>';
+  function updateViewBtns() {
+    viewBtns.forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-day') === String(pickingDay));
+    });
   }
 
-  // 指定した曜日（0=月〜4=金）を、元の表のまま大きくしたテーブルで組み立てる
-  function buildSingleDay(dayIndex) {
-    const col3 = dayIndex * 2;       // 3年の列
-    const col4 = dayIndex * 2 + 1;   // 4年の列
-    const dayName = dayHeaders[dayIndex].innerHTML;
-    const g3 = gradeHeaders[col3].innerHTML;
-    const g4 = gradeHeaders[col4].innerHTML;
-
-    let rowsHtml = '';
-    const rows = document.querySelectorAll('#timetable tbody tr');
-    rows.forEach(row => {
-      // 給食・昼休みの行
-      if (row.classList.contains('lunch-row')) {
-        rowsHtml +=
-          '<tr><th class="sd-th-time sd-th-lunch"><ruby>給食<rt>きゅうしょく</rt></ruby></th>' +
-          '<td class="sd-td-lunch" colspan="2"><ruby>給食<rt>きゅうしょく</rt></ruby>・<ruby>昼休<rt>ひるやす</rt></ruby>み</td></tr>';
-        return;
-      }
-
-      // td を colspan の分だけ展開して10列にそろえる
-      const grid = [];
-      row.querySelectorAll('td').forEach(td => {
-        const span = parseInt(td.getAttribute('colspan') || '1', 10);
-        for (let i = 0; i < span; i++) grid.push(td);
-      });
-
-      const timeCol = row.querySelector('.time-col');
-      let label = '';
-      if (row.classList.contains('dismissal-row')) {
-        label = '<ruby>下校<rt>げこう</rt></ruby>';
-      } else {
-        const numNode = timeCol.childNodes[0];
-        const num = numNode ? numNode.textContent.trim() : '';
-        label = num + '<ruby>時間目<rt>じかんめ</rt></ruby>';
-        const span = timeCol.querySelector('.period-time');
-        if (span) label += '<br><span class="sd-time">' + span.textContent + '</span>';
-      }
-
-      const cell3 = grid[col3];
-      const cell4 = grid[col4];
-      let cellsHtml;
-      if (cell3 === cell4) {
-        // 3年・4年がひとつにつながっているマス
-        cellsHtml = renderCell(cell3, 'colspan="2"');
-      } else {
-        cellsHtml = renderCell(cell3, '') + renderCell(cell4, '');
-      }
-
-      rowsHtml += '<tr><th class="sd-th-time">' + label + '</th>' + cellsHtml + '</tr>';
-    });
-
-    return '<table class="sd-table"><thead>' +
-             '<tr><th class="sd-th-corner" rowspan="2"></th>' +
-             '<th class="sd-th-day" colspan="2">' + dayName + '<ruby>曜日<rt>ようび</rt></ruby></th></tr>' +
-             '<tr><th class="sd-th-grade">' + g3 + '</th>' +
-             '<th class="sd-th-grade">' + g4 + '</th></tr>' +
-           '</thead><tbody>' + rowsHtml + '</tbody></table>';
+  // 設定画面には、いつも編集できる全体の表を出す
+  function renderTeacherTable() {
+    tableWrapper.style.display = 'block';
+    teacherTableSlot.appendChild(tableWrapper);
   }
 
   viewBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      viewBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const day = btn.getAttribute('data-day');
-      if (day === 'all') {
-        tableWrapper.style.display = 'block';
-        singleDayView.style.display = 'none';
-      } else {
-        singleDayView.innerHTML = buildSingleDay(parseInt(day, 10));
-        tableWrapper.style.display = 'none';
-        singleDayView.style.display = 'block';
-      }
+      pickingDay = btn.getAttribute('data-day');
+      updateViewBtns();
     });
   });
 
-  resetBtn.addEventListener('click', () => {
-    if (confirm('変更を初期化しますか？')) location.reload();
+  document.getElementById('showBtn').addEventListener('click', () => {
+    selectedDay = pickingDay;
+    openSchedule();
   });
+
+  /* ===== 時間割のデータ ===== */
+  // 各コマは { m:true, v:['体育'] }（3・4がいっしょ）
+  //        { m:false, v:['音楽','図工'] }（3年・4年でべつべつ）
+  // 中身が null のときは「じゅぎょう なし（黒いマス）」
+  const BASE = {
+    days: ['<ruby>月<rt>げつ</rt></ruby>', '<ruby>火<rt>か</rt></ruby>',
+           '<ruby>水<rt>すい</rt></ruby>', '<ruby>木<rt>もく</rt></ruby>',
+           '<ruby>金<rt>きん</rt></ruby>'],
+    grades: ['3', '4'],
+    rows: [
+      { type: 'period', label: '1', time: '9:40-10:25', cells: [
+        { m: true,  v: ['<ruby>体育<rt>たいいく</rt></ruby>'] },
+        { m: true,  v: ['<ruby>国語<rt>こくご</rt></ruby>'] },
+        { m: false, v: ['<ruby>音楽<rt>おんがく</rt></ruby>', '<ruby>図工<rt>ずこう</rt></ruby>'] },
+        { m: false, v: ['<ruby>自立<rt>じりつ</rt></ruby><br>(プール)', '<ruby>自立<rt>じりつ</rt></ruby>'] },
+        { m: true,  v: ['<ruby>自立<rt>じりつ</rt></ruby>'] }
+      ]},
+      { type: 'period', label: '2', time: '10:40-11:25', cells: [
+        { m: true,  v: ['<ruby>算数<rt>さんすう</rt></ruby>'] },
+        { m: false, v: ['POS', '<ruby>自立<rt>じりつ</rt></ruby>'] },
+        { m: false, v: ['<ruby>図工<rt>ずこう</rt></ruby>', '<ruby>音楽<rt>おんがく</rt></ruby>'] },
+        { m: false, v: ['<ruby>生単<rt>せいたん</rt></ruby>', '<ruby>自立<rt>じりつ</rt></ruby><br>(プール)'] },
+        { m: true,  v: ['<ruby>生単<rt>せいたん</rt></ruby>'] }
+      ]},
+      { type: 'lunch' },
+      { type: 'period', label: '3', time: '13:20-14:05', cells: [
+        { m: false, v: ['<ruby>自立<rt>じりつ</rt></ruby>', '<ruby>生単<rt>せいたん</rt></ruby>'] },
+        { m: true,  v: ['<ruby>生単<rt>せいたん</rt></ruby>'] },
+        { m: true,  v: ['<ruby>国語<rt>こくご</rt></ruby>'] },
+        { m: true,  v: ['<ruby>総合<rt>そうごう</rt></ruby>'] },
+        { m: true,  v: ['<ruby>自立<rt>じりつ</rt></ruby>'] }
+      ]},
+      { type: 'period', label: '4', time: '14:10-14:55', cells: [
+        { m: false, v: [null, '<ruby>自立<rt>じりつ</rt></ruby><br>(POS)'] },
+        { m: false, v: ['<ruby>生単<rt>せいたん</rt></ruby>', 'POS'] },
+        { m: true,  v: [null] },
+        { m: false, v: [null, '<ruby>自立<rt>じりつ</rt></ruby>'] },
+        { m: true,  v: [null] }
+      ]},
+      { type: 'exit', label: '<ruby>下校<rt>げこう</rt></ruby>', cells: [
+        { m: false, v: ['14:00', '15:30'] },
+        { m: true,  v: ['15:30'] },
+        { m: true,  v: ['14:00'] },
+        { m: true,  v: ['15:30'] },
+        { m: true,  v: ['14:00'] }
+      ]}
+    ]
+  };
+
+  // いま使っている時間割（BASEをコピーして使う）
+  let TT = JSON.parse(JSON.stringify(BASE));
+
+  const timetableEl = document.getElementById('timetable');
+
+  /* ===== 時間割の表を作る ===== */
+  function renderTable() {
+    let h = '<thead><tr><th class="corner-cell" rowspan="2"></th>';
+    TT.days.forEach((d, i) => {
+      h += '<th class="day-header" colspan="2" data-day="' + i + '">' + d + '</th>';
+    });
+    h += '</tr><tr>';
+    TT.days.forEach(() => {
+      h += '<th class="grade-header" data-g="0">' + TT.grades[0] + '</th>' +
+           '<th class="grade-header" data-g="1">' + TT.grades[1] + '</th>';
+    });
+    h += '</tr></thead><tbody>';
+
+    TT.rows.forEach((row, ri) => {
+      if (row.type === 'lunch') {
+        h += '<tr class="lunch-row"><th class="time-col">' +
+             '<ruby>給食<rt>きゅうしょく</rt></ruby></th>' +
+             '<td colspan="10"><ruby>給食<rt>きゅうしょく</rt></ruby>・' +
+             '<ruby>昼休<rt>ひるやす</rt></ruby>み</td></tr>';
+        return;
+      }
+      const isExit = (row.type === 'exit');
+      let label = isExit ? row.label
+                         : row.label + '<br><span class="period-time" data-r="' + ri + '">' +
+                           row.time + '</span>';
+      h += '<tr class="' + (isExit ? 'dismissal-row' : '') + '">' +
+           '<th class="time-col">' + label + '</th>';
+
+      row.cells.forEach((c, di) => {
+        const cls = isExit ? 'time-cell' : 'subject-cell';
+        if (c.m) {
+          h += cellHtml(c.v[0], cls, 'colspan="2"', ri, di, 0);
+        } else {
+          h += cellHtml(c.v[0], cls, '', ri, di, 0) +
+               cellHtml(c.v[1], cls, '', ri, di, 1);
+        }
+      });
+      h += '</tr>';
+    });
+
+    timetableEl.innerHTML = h + '</tbody>';
+    wireTable();
+  }
+
+  // マス1つ分のHTML
+  function cellHtml(val, cls, span, ri, di, gi) {
+    const pos = 'data-r="' + ri + '" data-d="' + di + '" data-g="' + gi + '"';
+    if (val === null) {
+      return '<td class="black-cell ' + cls + '" ' + span + ' ' + pos + '></td>';
+    }
+    return '<td class="' + cls + '" ' + span + ' ' + pos + '>' + val + '</td>';
+  }
+
+  // 表のマスをタップできるようにする
+  function wireTable() {
+    timetableEl.querySelectorAll('.subject-cell, .time-cell').forEach(td => {
+      td.addEventListener('click', () => openCellModal(td.dataset));
+    });
+    timetableEl.querySelectorAll('.day-header').forEach(th => {
+      th.addEventListener('click', () => openSimpleModal('day', th.dataset.day));
+    });
+    timetableEl.querySelectorAll('.grade-header').forEach(th => {
+      th.addEventListener('click', () => openSimpleModal('grade', th.dataset.g));
+    });
+    timetableEl.querySelectorAll('.period-time').forEach(sp => {
+      sp.addEventListener('click', () => openSimpleModal('time', sp.dataset.r));
+    });
+  }
+
+  /* ===== 時間割の画面 ===== */
+  function openSchedule() {
+    if (selectedDay === 'all') {
+      scheduleContent.innerHTML = '';
+      tableWrapper.style.display = 'block';
+      scheduleContent.appendChild(tableWrapper);
+    } else {
+      tableWrapper.style.display = 'none';
+      renderSingleDay(parseInt(selectedDay, 10));
+    }
+    showView('schedule');
+  }
+
+  // 1日だけ大きく表示する
+  function renderSingleDay(di) {
+    let rows = '';
+    TT.rows.forEach((row, ri) => {
+      if (row.type === 'lunch') {
+        rows += '<tr><th class="sd-th-time sd-th-lunch">' +
+                '<ruby>給食<rt>きゅうしょく</rt></ruby></th>' +
+                '<td class="sd-td-lunch" colspan="2">' +
+                '<ruby>給食<rt>きゅうしょく</rt></ruby>・' +
+                '<ruby>昼休<rt>ひるやす</rt></ruby>み</td></tr>';
+        return;
+      }
+      const isExit = (row.type === 'exit');
+      let label = isExit ? row.label
+                         : row.label + '<ruby>時間目<rt>じかんめ</rt></ruby>' +
+                           '<br><span class="sd-time">' + row.time + '</span>';
+
+      const c = row.cells[di];
+      let tds;
+      if (c.m) {
+        tds = sdTd(c.v[0], 'colspan="2"', ri, di, 0);
+      } else {
+        tds = sdTd(c.v[0], '', ri, di, 0) + sdTd(c.v[1], '', ri, di, 1);
+      }
+      rows += '<tr><th class="sd-th-time">' + label + '</th>' + tds + '</tr>';
+    });
+
+    scheduleContent.innerHTML =
+      '<table class="sd-table"><thead>' +
+      '<tr><th class="sd-th-corner" rowspan="2"></th>' +
+      '<th class="sd-th-day" colspan="2">' + TT.days[di] +
+      '<ruby>曜日<rt>ようび</rt></ruby></th></tr>' +
+      '<tr><th class="sd-th-grade">' + TT.grades[0] + '</th>' +
+      '<th class="sd-th-grade">' + TT.grades[1] + '</th></tr>' +
+      '</thead><tbody>' + rows + '</tbody></table>';
+
+    scheduleContent.querySelectorAll('.sd-td').forEach(td => {
+      if (td.classList.contains('sd-black')) return;
+      td.addEventListener('click', () => openCellModal(td.dataset));
+    });
+  }
+
+  function sdTd(val, span, ri, di, gi) {
+    const pos = 'data-r="' + ri + '" data-d="' + di + '" data-g="' + gi + '"';
+    if (val === null) {
+      return '<td class="sd-td sd-black" ' + span + ' ' + pos + '></td>';
+    }
+    return '<td class="sd-td" ' + span + ' ' + pos + '>' + val + '</td>';
+  }
+
+  // 表示を作り直す（今見ている画面に合わせて）
+  function refreshTimetable() {
+    renderTable();
+    if (currentView === 'schedule' && selectedDay !== 'all') {
+      renderSingleDay(parseInt(selectedDay, 10));
+    }
+  }
+
+  /* ===== 日にち・曜日・天気の画面 ===== */
+  const item1Label = document.getElementById('item1Label');
+  const defaultItem1 = item1Label.innerHTML;
+  const calTable = document.getElementById('calTable');
+  const calMonthLabel = document.getElementById('calMonthLabel');
+  const weatherRow = document.getElementById('weatherRow');
+  const previewBox = document.getElementById('previewBox');
+
+  const WEEK = ['日', '月', '火', '水', '木', '金', '土'];
+  // カレンダーの並び（月曜はじまり）
+  const CAL_WEEK = ['月', '火', '水', '木', '金', '土', '日'];
+  // 日曜=0 の曜日番号を、月曜はじまりの位置（月=0…日=6）に直す
+  function calPos(dow) { return (dow + 6) % 7; }
+
+  const WEATHERS = [
+    { name: 'はれ',   icon: '☀' },
+    { name: 'くもり', icon: '☁' },
+    { name: 'あめ',   icon: '☂' },
+    { name: 'ゆき',   icon: '☃' }
+  ];
+
+  let calYear, calMonth;
+  let pickedDate = null;
+  let pickedWeather = null;
+
+  function sameDay(a, b) {
+    return a && b && a.getFullYear() === b.getFullYear()
+        && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  function openDateView() {
+    const today = new Date();
+    if (!pickedDate) pickedDate = today;
+    calYear = pickedDate.getFullYear();
+    calMonth = pickedDate.getMonth();
+    renderCalendar();
+    renderWeather();
+    updatePreview();
+    showView('date');
+  }
+
+  function renderCalendar() {
+    const today = new Date();
+    calMonthLabel.textContent = calYear + '年 ' + (calMonth + 1) + '月';
+
+    let html = '<thead><tr>';
+    CAL_WEEK.forEach((w, i) => {
+      const cls = (i === 5) ? ' class="sat"' : (i === 6) ? ' class="sun"' : '';
+      html += '<th' + cls + '>' + w + '</th>';
+    });
+    html += '</tr></thead><tbody><tr>';
+
+    const firstPos = calPos(new Date(calYear, calMonth, 1).getDay());
+    const lastDate = new Date(calYear, calMonth + 1, 0).getDate();
+
+    for (let i = 0; i < firstPos; i++) html += '<td class="empty"></td>';
+
+    for (let d = 1; d <= lastDate; d++) {
+      const pos = (firstPos + d - 1) % 7;
+      const thisDate = new Date(calYear, calMonth, d);
+      let cls = (pos === 6) ? 'sun' : (pos === 5) ? 'sat' : '';
+      if (sameDay(thisDate, today)) cls += ' today';
+      if (sameDay(thisDate, pickedDate)) cls += ' picked';
+      html += '<td class="' + cls.trim() + '" data-day="' + d + '">' + d + '</td>';
+      if (pos === 6 && d !== lastDate) html += '</tr><tr>';
+    }
+
+    const lastPos = (firstPos + lastDate - 1) % 7;
+    for (let i = lastPos; i < 6; i++) html += '<td class="empty"></td>';
+    html += '</tr></tbody>';
+
+    calTable.innerHTML = html;
+
+    calTable.querySelectorAll('td[data-day]').forEach(td => {
+      td.addEventListener('click', () => {
+        pickedDate = new Date(calYear, calMonth, parseInt(td.getAttribute('data-day'), 10));
+        renderCalendar();
+        updatePreview();
+      });
+    });
+  }
+
+  function renderWeather() {
+    weatherRow.innerHTML = '';
+    WEATHERS.forEach(w => {
+      const btn = document.createElement('button');
+      btn.className = 'weather-card' + (pickedWeather === w.name ? ' picked' : '');
+      btn.innerHTML = '<span class="w-icon">' + w.icon + '</span>' + w.name;
+      btn.addEventListener('click', () => {
+        pickedWeather = w.name;
+        renderWeather();
+        updatePreview();
+      });
+      weatherRow.appendChild(btn);
+    });
+  }
+
+  function buildLabel() {
+    if (!pickedDate) return '';
+    const m = pickedDate.getMonth() + 1;
+    const d = pickedDate.getDate();
+    const w = WEEK[pickedDate.getDay()];
+    let text = m + '月' + d + '日（' + w + '）';
+    if (pickedWeather) {
+      const wt = WEATHERS.find(x => x.name === pickedWeather);
+      text += ' ' + wt.icon + ' ' + wt.name;
+    }
+    return text;
+  }
+
+  function updatePreview() {
+    const label = buildLabel();
+    previewBox.textContent = label || 'えらんでください';
+  }
+
+  // えらんだ日づけ・天気を、ホームの「1」に反映する
+  function applyDateLabel() {
+    const label = buildLabel();
+    if (label) item1Label.textContent = label;
+  }
+
+  document.getElementById('prevMonth').addEventListener('click', () => {
+    calMonth--;
+    if (calMonth < 0) { calMonth = 11; calYear--; }
+    renderCalendar();
+  });
+
+  document.getElementById('nextMonth').addEventListener('click', () => {
+    calMonth++;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    renderCalendar();
+  });
+
+  document.getElementById('todayBtn').addEventListener('click', () => {
+    const today = new Date();
+    pickedDate = today;
+    calYear = today.getFullYear();
+    calMonth = today.getMonth();
+    renderCalendar();
+    updatePreview();
+  });
+
+  /* ===== 日直のスピーチ（7） ===== */
+  const themeBox = document.getElementById('themeBox');
+  const helpBtn = document.getElementById('helpBtn');
+  const timerRing = document.getElementById('timerRing');
+  const timerNum = document.getElementById('timerNum');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const againBtn = document.getElementById('againBtn');
+  const resultBox = document.getElementById('resultBox');
+
+  const GOAL = 60;                  // 目ひょうの秒数（1分）
+  const RING = 502.65;              // 円のふちの長さ
+  let timerId = null;
+  let startTime = null;
+
+  // 話すテーマ（ルーレットの中身）
+  const THEMES = [
+    'すきな たべもの', 'すきな あそび', 'すきな どうぶつ',
+    'すきな いろ', 'すきな きゅうしょく', 'すきな きょうか',
+    'きのう たのしかったこと', 'やすみの日に したこと',
+    'さいきん うれしかったこと', 'いま がんばっていること',
+    'いってみたい ところ', 'かぞくの こと'
+  ];
+
+  // 残り時間に合わせて、円の色と長さを変える
+  function paintTimer(remain) {
+    if (remain > 0) {
+      const ratio = remain / GOAL;
+      timerRing.setAttribute('stroke-dashoffset', String(RING * (1 - ratio)));
+      let color = '#2e7d32';                       // みどり
+      if (remain < 20) color = '#ef6c00';          // オレンジ
+      else if (remain < 40) color = '#f9a825';     // きいろ
+      timerRing.setAttribute('stroke', color);
+      timerNum.textContent = Math.ceil(remain);
+      timerNum.classList.remove('over');
+    } else {
+      // 1分をすぎたら、赤い円のまま こえた分を数える
+      timerRing.setAttribute('stroke-dashoffset', '0');
+      timerRing.setAttribute('stroke', '#c62828');
+      timerNum.textContent = '+' + Math.floor(-remain);
+      timerNum.classList.add('over');
+    }
+  }
+
+  // タイマーを最初の じょうたいに もどす
+  function resetTimer() {
+    if (timerId) { clearInterval(timerId); timerId = null; }
+    startTime = null;
+    paintTimer(GOAL);
+    startBtn.style.display = 'block';
+    stopBtn.style.display = 'none';
+    againBtn.style.display = 'none';
+    resultBox.style.display = 'none';
+    // 前の子のテーマを消しておく
+    themeBox.style.display = 'none';
+    themeBox.textContent = '';
+    helpBtn.disabled = false;
+  }
+
+  startBtn.addEventListener('click', () => {
+    startTime = Date.now();
+    resultBox.style.display = 'none';
+    againBtn.style.display = 'none';
+    startBtn.style.display = 'none';
+    stopBtn.style.display = 'block';
+    paintTimer(GOAL);
+    timerId = setInterval(() => {
+      const passed = (Date.now() - startTime) / 1000;
+      paintTimer(GOAL - passed);
+    }, 100);
+  });
+
+  stopBtn.addEventListener('click', () => {
+    if (!startTime) return;
+    const passed = Math.round((Date.now() - startTime) / 1000);
+    clearInterval(timerId);
+    timerId = null;
+
+    const diff = passed - GOAL;
+    let msg;
+    if (diff === 0) {
+      msg = 'ぴったり 1ぷん！';
+    } else if (diff < 0) {
+      msg = '1ぷんまで あと ' + (-diff) + 'びょう（−' + (-diff) + 'びょう）';
+    } else {
+      msg = '1ぷんより ' + diff + 'びょう ながく はなせた（＋' + diff + 'びょう）';
+    }
+
+    resultBox.innerHTML =
+      'はなした じかん<br><span class="result-time">' + passed + ' びょう</span><br>' + msg;
+    resultBox.style.display = 'block';
+    stopBtn.style.display = 'none';
+    againBtn.style.display = 'block';
+  });
+
+  againBtn.addEventListener('click', resetTimer);
+
+  // おたすけルーレット
+  helpBtn.addEventListener('click', () => {
+    helpBtn.disabled = true;
+    themeBox.style.display = 'block';
+    themeBox.classList.add('spinning');
+    let count = 0;
+    const spin = setInterval(() => {
+      themeBox.textContent = THEMES[Math.floor(Math.random() * THEMES.length)];
+      count++;
+      if (count > 18) {                 // だんだん止まる
+        clearInterval(spin);
+        themeBox.classList.remove('spinning');
+        themeBox.textContent = THEMES[Math.floor(Math.random() * THEMES.length)];
+        helpBtn.disabled = false;
+      }
+    }, 80);
+  });
+
+  /* ===== 選択・入力のポップアップ ===== */
+  let target = null;   // 今えらんでいる場所
+
+  const subjectCards = [
+    '<ruby>体育<rt>たいいく</rt></ruby>', '<ruby>国語<rt>こくご</rt></ruby>',
+    '<ruby>算数<rt>さんすう</rt></ruby>', '<ruby>音楽<rt>おんがく</rt></ruby>',
+    '<ruby>図工<rt>ずこう</rt></ruby>', '<ruby>生単<rt>せいたん</rt></ruby>',
+    '<ruby>総合<rt>そうごう</rt></ruby>', '<ruby>自立<rt>じりつ</rt></ruby>',
+    '<ruby>自立<rt>じりつ</rt></ruby><br>(プール)',
+    '<ruby>自立<rt>じりつ</rt></ruby><br>(POS)', 'POS'
+  ];
+  const timeCards = ['11:30', '13:00', '14:00', '14:30', '15:00', '15:30'];
+  const periodTimeCards = ['9:40-10:25', '10:40-11:25', '13:20-14:05', '14:10-14:55'];
+  const dayCards = ['<ruby>月<rt>げつ</rt></ruby>', '<ruby>火<rt>か</rt></ruby>',
+                    '<ruby>水<rt>すい</rt></ruby>', '<ruby>木<rt>もく</rt></ruby>',
+                    '<ruby>金<rt>きん</rt></ruby>'];
+  const gradeCards = ['1', '2', '3', '4', '5', '6'];
+
+  function showCards(cards, onPick) {
+    cardContainer.style.display = 'flex';
+    cards.forEach(html => {
+      const btn = document.createElement('button');
+      btn.className = 'subject-card';
+      btn.innerHTML = html;
+      btn.addEventListener('click', () => { onPick(html); closeModal(); });
+      cardContainer.appendChild(btn);
+    });
+  }
+
+  // 「いっしょにする／わける」のボタンを、ポップアップの上に出す
+  function addMergeButton(ri, di) {
+    const cell = TT.rows[ri].cells[di];
+    const btn = document.createElement('button');
+    btn.className = 'merge-btn';
+    btn.innerHTML = cell.m
+      ? '⇤⇥ 3と4に わける'
+      : '⇥⇤ 3・4を いっしょにする';
+    btn.addEventListener('click', () => {
+      if (cell.m) {
+        cell.m = false;
+        cell.v = ['', ''];        // わけたら 両方とも空にする
+      } else {
+        cell.m = true;
+        cell.v = [cell.v[0]];     // いっしょにしたら 3年の中身を使う
+      }
+      closeModal();
+      refreshTimetable();
+    });
+    mergeSlot.appendChild(btn);
+  }
+
+  // 科目・下校時間のマスをタップしたとき
+  function openCellModal(ds) {
+    const ri = +ds.r, di = +ds.d, gi = +ds.g;
+    const row = TT.rows[ri];
+    const cell = row.cells[di];
+    target = { ri, di, gi };
+
+    cardContainer.innerHTML = '';
+    mergeSlot.innerHTML = '';
+    customInput.value = '';
+
+    // 下校の行にも「いっしょ／わける」を出す
+    addMergeButton(ri, di);
+
+    const isExit = (row.type === 'exit');
+    modalTitle.textContent = isExit ? '下校時間を選んでください' : '科目を選んでください';
+
+    const cards = isExit ? timeCards : subjectCards;
+    showCards(cards, val => setCell(ri, di, gi, val));
+
+    // 「じゅぎょう なし（黒いマス）」にするボタン
+    if (!isExit) {
+      const none = document.createElement('button');
+      none.className = 'subject-card none-card';
+      none.textContent = 'なし（黒）';
+      none.addEventListener('click', () => {
+        setCell(ri, di, gi, null);
+        closeModal();
+      });
+      cardContainer.appendChild(none);
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  // 曜日・学年・時間をタップしたとき
+  function openSimpleModal(kind, idx) {
+    target = { kind, idx: +idx };
+    cardContainer.innerHTML = '';
+    mergeSlot.innerHTML = '';
+    customInput.value = '';
+
+    if (kind === 'day') {
+      modalTitle.textContent = '曜日を選んでください';
+      showCards(dayCards, v => { TT.days[target.idx] = v; refreshTimetable(); });
+    } else if (kind === 'grade') {
+      modalTitle.textContent = '学年を選んでください';
+      showCards(gradeCards, v => { TT.grades[target.idx] = v; refreshTimetable(); });
+    } else {
+      modalTitle.textContent = '時間を選んでください';
+      showCards(periodTimeCards, v => { TT.rows[target.idx].time = v; refreshTimetable(); });
+    }
+    modal.style.display = 'flex';
+  }
+
+  // マスの中身を書きかえる
+  function setCell(ri, di, gi, val) {
+    const cell = TT.rows[ri].cells[di];
+    if (cell.m) cell.v[0] = val;
+    else cell.v[gi] = val;
+    refreshTimetable();
+  }
+
+  // 直接入力の「決定」
+  customSubmitBtn.addEventListener('click', () => {
+    const val = customInput.value.trim();
+    if (val === '' || !target) return;
+    if (target.kind === 'day') TT.days[target.idx] = val;
+    else if (target.kind === 'grade') TT.grades[target.idx] = val;
+    else if (target.kind === 'time') TT.rows[target.idx].time = val;
+    else setCell(target.ri, target.di, target.gi, val);
+    closeModal();
+    refreshTimetable();
+  });
+
+  function closeModal() {
+    modal.style.display = 'none';
+    target = null;
+  }
+
+  closeModalBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+  // きほんの時間割に もどす
+  document.getElementById('resetTableBtn').addEventListener('click', () => {
+    if (confirm('時間割を、きほんの形にもどしますか？\n（朝の会のチェックはそのまま残ります）')) {
+      TT = JSON.parse(JSON.stringify(BASE));
+      refreshTimetable();
+    }
+  });
+
+  document.getElementById('resetChecksBtn').addEventListener('click', () => {
+    if (confirm('あさのかいのチェックを、ぜんぶ消しますか？\n（時間割や日にちの内容はそのまま残ります）')) {
+      doneItems.clear();
+      item1Label.innerHTML = defaultItem1;
+      pickedWeather = null;
+      pickedDate = null;
+      refreshHome();
+      showView('home');
+    }
+  });
+
+  resetBtn.addEventListener('click', () => {
+    if (confirm('変更を初期化しますか？\n（時間割と、日にち・天気のえらび直しが元に戻ります）')) {
+      location.reload();
+    }
+  });
+
+  // 最初はホーム画面
+  renderTable();
+  refreshHome();
+  showView('home');
 });
 </script>
 </body>
