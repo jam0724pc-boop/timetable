@@ -36,33 +36,89 @@ button, input { font-family: inherit; font-weight: 700; -webkit-tap-highlight-co
 }
 .menu-btn {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: baseline;        /* 文字の下の線でそろえる */
+  gap: 14px;
   width: 100%;
+  min-height: 92px;             /* 高さをそろえる（E） */
+  box-sizing: border-box;
   text-align: left;
   background: white;
-  border: 3px solid #90a4ae;
+  border: 3px solid #546e7a;    /* 枠を濃く（D） */
   border-radius: 12px;
-  padding: 18px 16px;
+  padding: 28px 18px 20px;
   margin-bottom: 12px;
-  font-size: 30px;
-  line-height: 1.4;
-  color: #212121;
+  color: #111;                  /* 文字を濃く（D） */
   cursor: pointer;
   transition: background-color 0.15s;
-  -webkit-text-stroke: 0.3px currentColor;
 }
+.menu-btn:active { background: #e3f2fd; }
+
+/* マークは行の中央にそろえる */
 .icon-slot {
-  flex: 0 0 auto;
+  flex: 0 0 40px;
+  align-self: center;
   display: flex;
-  align-items: center;
+  justify-content: center;
   color: #546e7a;
 }
 .item-icon { display: block; }
-/* 見出し帯の中のマーク */
 .item-head .item-icon { display: inline-block; vertical-align: -6px; }
-.menu-btn:active { background: #e3f2fd; }
-.menu-btn .num { color: #546e7a; margin-right: 10px; }
+
+/* 番号 */
+.menu-btn .num {
+  flex: 0 0 auto;
+  font-size: 30px;
+  color: #546e7a;
+}
+/* 項目名 */
+.menu-label {
+  flex: 1;
+  font-size: 30px;
+  line-height: 1.35;
+}
+/* ふりがなを小さめに（B） */
+.menu-label rt { font-size: 0.45em; }
+
+/* いまここ：行全体を濃い青に白文字（C） */
+.menu-btn.now {
+  background: #1565c0;
+  border-color: #0d47a1;
+  color: white;
+}
+.menu-btn.now:active { background: #0d47a1; }
+.menu-btn.now .num,
+.menu-btn.now .icon-slot { color: white; }
+.menu-btn.now::before {
+  content: '▶';
+  align-self: center;
+  font-size: 26px;
+  line-height: 1;
+  color: white;
+}
+
+/* おわった項目 */
+.menu-btn.done {
+  background: #e8f5e9;
+  border-color: #2e7d32;
+  color: #33691e;
+}
+.menu-btn.done .num { color: #558b2f; }
+.menu-btn.done .icon-slot { color: #2e7d32; }
+.menu-btn.done::after {
+  content: '✓';
+  align-self: center;
+  font-size: 30px;
+  color: #2e7d32;
+}
+/* おわった項目は「いまここ」より落ち着いた見た目にする */
+.menu-btn.done.now {
+  background: #e8f5e9;
+  border-color: #2e7d32;
+  color: #33691e;
+}
+.menu-btn.done.now .num { color: #558b2f; }
+.menu-btn.done.now .icon-slot { color: #2e7d32; }
+.menu-btn.done.now::before { color: #2e7d32; }
 
 .teacher-link {
   display: block;
@@ -209,7 +265,7 @@ button, input { font-family: inherit; font-weight: 700; -webkit-tap-highlight-co
 /* ===== 名前よびの画面 ===== */
 /* ===== 各画面の見出し帯（今どの項目か） ===== */
 .item-head {
-  background: #1976d2;
+  background: #1565c0;
   color: white;
   font-size: 30px;
   text-align: center;
@@ -218,30 +274,7 @@ button, input { font-family: inherit; font-weight: 700; -webkit-tap-highlight-co
   margin-bottom: 14px;
   line-height: 1.4;
 }
-
-/* ===== ホーム画面の「いまここ」印とチェック ===== */
-.menu-btn.now {
-  border-color: #1976d2;
-  border-width: 4px;
-  background: #e3f2fd;
-  box-shadow: 0 0 0 3px #bbdefb;
-}
-.menu-btn.now::before {
-  content: '▶';
-  color: #1976d2;
-}
-.menu-btn.now .icon-slot { color: #1976d2; }
-.menu-btn.done .icon-slot { color: #2e7d32; }
-.menu-btn.done {
-  background: #e8f5e9;
-  border-color: #2e7d32;
-  color: #558b2f;
-}
-.menu-btn.done::after {
-  content: ' ✓';
-  color: #2e7d32;
-}
-.menu-btn.done.now { background: #e8f5e9; }
+.item-head rt { font-size: 0.45em; }
 
 /* おわり／とりけしボタン */
 .undo-btn {
@@ -457,25 +490,31 @@ table#timetable {
   <div class="home-title">あさのかい</div>
 
   <button class="menu-btn" id="item1Btn" data-item="1">
-    <span class="num">1.</span><span id="item1Label"><ruby>日<rt>ひ</rt></ruby>にち・<ruby>曜日<rt>ようび</rt></ruby>・<ruby>天気<rt>てんき</rt></ruby></span>
+    <span class="num">1.</span><span id="item1Label" class="menu-label"><ruby>日<rt>ひ</rt></ruby>にち・<ruby>曜日<rt>ようび</rt></ruby>・<ruby>天気<rt>てんき</rt></ruby></span>
   </button>
+
   <button class="menu-btn" id="item2Btn" data-item="2">
-    <span class="num">2.</span><ruby>名前<rt>なまえ</rt></ruby>よび
+    <span class="num">2.</span><span class="menu-label"><ruby>名前<rt>なまえ</rt></ruby>よび</span>
   </button>
+
   <button class="menu-btn" data-item="3">
-    <span class="num">3.</span><ruby>今日<rt>きょう</rt></ruby>のよてい
+    <span class="num">3.</span><span class="menu-label"><ruby>今日<rt>きょう</rt></ruby>のよてい</span>
   </button>
+
   <button class="menu-btn" data-item="4">
-    <span class="num">4.</span><ruby>給食<rt>きゅうしょく</rt></ruby>
+    <span class="num">4.</span><span class="menu-label"><ruby>給食<rt>きゅうしょく</rt></ruby></span>
   </button>
+
   <button class="menu-btn" data-item="5">
-    <span class="num">5.</span><ruby>帰<rt>かえ</rt></ruby>りのかくにん
+    <span class="num">5.</span><span class="menu-label"><ruby>帰<rt>かえ</rt></ruby>りのかくにん</span>
   </button>
+
   <button class="menu-btn" data-item="6">
-    <span class="num">6.</span><ruby>先生<rt>せんせい</rt></ruby>の<ruby>話<rt>はなし</rt></ruby>
+    <span class="num">6.</span><span class="menu-label"><ruby>先生<rt>せんせい</rt></ruby>の<ruby>話<rt>はなし</rt></ruby></span>
   </button>
+
   <button class="menu-btn" data-item="7">
-    <span class="num">7.</span><ruby>日直<rt>にっちょく</rt></ruby>のスピーチ
+    <span class="num">7.</span><span class="menu-label"><ruby>日直<rt>にっちょく</rt></ruby>のスピーチ</span>
   </button>
 
   <button class="teacher-link" id="teacherLink">⚙ せんせい（じゅんび）</button>
