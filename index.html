@@ -461,6 +461,13 @@ table#timetable {
   padding: 12px 18px; background-color: #e1f5fe; border: 1px solid #0288d1;
   border-radius: 8px; cursor: pointer; font-size: 20px;
 }
+.modal-note {
+  display: block;
+  margin-top: 6px;
+  font-size: 15px;
+  font-weight: 400;
+  color: #00695c;
+}
 .merge-btn {
   display: block; width: 100%; padding: 14px;
   margin-bottom: 18px;
@@ -784,7 +791,8 @@ table#timetable {
       <button class="view-btn" data-day="4"><ruby>金<rt>きん</rt></ruby></button>
       <button class="view-btn active" data-day="all">全部</button>
     </div>
-    <div class="step-label">② 下の表をタップして、今日の予定に直す</div>
+    <div class="step-label">② 下の表をタップして、今日の予定に直す<br>
+      　（ここでの変更は<b>今日だけ</b>。きほんの週時程は変わりません）</div>
     <div class="step-label">③ できたら「この画面を出す」を押す</div>
   </div>
 
@@ -792,15 +800,18 @@ table#timetable {
   <div id="teacherPreview"></div>
 
   <!-- 週の時程（ふだんは たたんでおく） -->
-  <button class="toggle-btn" id="toggleWeekBtn">▼ <ruby>週<rt>しゅう</rt></ruby>の<ruby>時程<rt>じてい</rt></ruby>を 見る</button>
+  <button class="toggle-btn" id="toggleWeekBtn">▼ きほんの<ruby>週<rt>しゅう</rt></ruby><ruby>時程<rt>じてい</rt></ruby>を 見る</button>
   <div id="teacherTableSlot" style="display:none;"></div>
 
   <button class="show-btn" id="showBtn">✓ この<ruby>画面<rt>がめん</rt></ruby>を<ruby>出<rt>だ</rt></ruby>す</button>
 
   <p class="hint">※ 曜日・学年・科目・時間・下校時間は、タップして変更できます。<br>
   ※ マスをタップすると「3・4を いっしょにする／わける」も えらべます。</p>
-  <button id="resetTableBtn" class="show-btn" style="background:#0277bd; margin-top:14px;">
-    ↩ 時間割を きほんの形に もどす
+  <button id="clearTodayBtn" class="show-btn" style="background:#00897b; margin-top:14px;">
+    ↩ きょうの へんこうを けす
+  </button>
+  <button id="resetTableBtn" class="show-btn" style="background:#0277bd; margin-top:10px;">
+    ↩ きほんの週時程を さいしょに もどす
   </button>
   <button id="resetChecksBtn" class="show-btn" style="background:#f57c00; margin-top:10px;">
     🔄 あさのかいの チェックを ぜんぶ消す
@@ -1036,7 +1047,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('teacherLink').addEventListener('click', () => {
-    pickingDay = selectedDay;
+    // 今日の曜日を最初からえらんでおく（月〜金のとき）
+    const wd = new Date().getDay();          // 0=日 … 6=土
+    if (wd >= 1 && wd <= 5) pickingDay = String(wd - 1);
+    else pickingDay = selectedDay;
     updateViewBtns();
     renderTeacherPreview();
     showView('teacher');
@@ -1078,8 +1092,8 @@ document.addEventListener('DOMContentLoaded', () => {
       teacherTableSlot.appendChild(tableWrapper);
     }
     toggleWeekBtn.innerHTML = open
-      ? '▲ <ruby>週<rt>しゅう</rt></ruby>の<ruby>時程<rt>じてい</rt></ruby>を とじる'
-      : '▼ <ruby>週<rt>しゅう</rt></ruby>の<ruby>時程<rt>じてい</rt></ruby>を 見る';
+      ? '▲ きほんの<ruby>週<rt>しゅう</rt></ruby><ruby>時程<rt>じてい</rt></ruby>を とじる'
+      : '▼ きほんの<ruby>週<rt>しゅう</rt></ruby><ruby>時程<rt>じてい</rt></ruby>を 見る';
   }
 
   toggleWeekBtn.addEventListener('click', () => {
@@ -1097,7 +1111,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('showBtn').addEventListener('click', () => {
     selectedDay = pickingDay;
-    openSchedule();
+    showView('home');
   });
 
   /* ===== 時間割のデータ ===== */
@@ -1149,10 +1163,33 @@ document.addEventListener('DOMContentLoaded', () => {
     ]
   };
 
-  // いま使っている時間割（BASEをコピーして使う）
+  // きほんの週時程（ずっと使うもの）
   let TT = JSON.parse(JSON.stringify(BASE));
+  // 今日だけの変更（きほんは変えない）  TODAY[曜日][行] = マスの中身
+  let TODAY = {};
 
   const timetableEl = document.getElementById('timetable');
+
+  // その曜日・その行のマスを取り出す（今日の変更があればそちらを使う）
+  function getCell(ri, di) {
+    if (TODAY[di] && TODAY[di][ri]) return TODAY[di][ri];
+    return TT.rows[ri].cells[di];
+  }
+
+  // 今日だけ変更したマスかどうか
+  function isChanged(ri, di) {
+    return !!(TODAY[di] && TODAY[di][ri]);
+  }
+
+  // マスの中身を書きこむ（src が 'today' なら今日だけ、'base' ならきほんを直す）
+  function putCell(ri, di, cell, src) {
+    if (src === 'base') {
+      TT.rows[ri].cells[di] = cell;
+    } else {
+      if (!TODAY[di]) TODAY[di] = {};
+      TODAY[di][ri] = cell;
+    }
+  }
 
   /* ===== 時間割の表を作る ===== */
   function renderTable() {
@@ -1198,9 +1235,9 @@ document.addEventListener('DOMContentLoaded', () => {
     wireTable();
   }
 
-  // マス1つ分のHTML
+  // マス1つ分のHTML（週の表＝きほんを直す）
   function cellHtml(val, cls, span, ri, di, gi) {
-    const pos = 'data-r="' + ri + '" data-d="' + di + '" data-g="' + gi + '"';
+    const pos = 'data-r="' + ri + '" data-d="' + di + '" data-g="' + gi + '" data-src="base"';
     if (val === null) {
       return '<td class="black-cell ' + cls + '" ' + span + ' ' + pos + '></td>';
     }
@@ -1253,7 +1290,7 @@ document.addEventListener('DOMContentLoaded', () => {
                          : row.label + '<ruby>時間目<rt>じかんめ</rt></ruby>' +
                            '<br><span class="sd-time">' + row.time + '</span>';
 
-      const c = row.cells[di];
+      const c = getCell(ri, di);
       let tds;
       if (c.m) {
         tds = sdTd(c.v[0], 'colspan="2"', ri, di, 0);
@@ -1270,6 +1307,15 @@ document.addEventListener('DOMContentLoaded', () => {
            '<tr><th class="sd-th-grade">' + TT.grades[0] + '</th>' +
            '<th class="sd-th-grade">' + TT.grades[1] + '</th></tr>' +
            '</thead><tbody>' + rows + '</tbody></table>';
+  }
+
+  // 1日表示のマス1つ分（今日だけの変更として直す）
+  function sdTd(val, span, ri, di, gi) {
+    const pos = 'data-r="' + ri + '" data-d="' + di + '" data-g="' + gi + '" data-src="today"';
+    if (val === null) {
+      return '<td class="sd-td sd-black" ' + span + ' ' + pos + '></td>';
+    }
+    return '<td class="sd-td" ' + span + ' ' + pos + '>' + val + '</td>';
   }
 
   // 1日分の表を、タップして編集できるようにする
@@ -1582,14 +1628,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 「いっしょにする／わける」のボタンを、ポップアップの上に出す
-  function addMergeButton(ri, di) {
-    const cell = TT.rows[ri].cells[di];
+  function addMergeButton(ri, di, src) {
+    const cur = (src === 'base') ? TT.rows[ri].cells[di] : getCell(ri, di);
     const btn = document.createElement('button');
     btn.className = 'merge-btn';
-    btn.innerHTML = cell.m
+    btn.innerHTML = cur.m
       ? '⇤⇥ 3と4に わける'
       : '⇥⇤ 3・4を いっしょにする';
     btn.addEventListener('click', () => {
+      const cell = JSON.parse(JSON.stringify(cur));
       if (cell.m) {
         cell.m = false;
         cell.v = ['', ''];        // わけたら 両方とも空にする
@@ -1597,6 +1644,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cell.m = true;
         cell.v = [cell.v[0]];     // いっしょにしたら 3年の中身を使う
       }
+      putCell(ri, di, cell, src);
       closeModal();
       refreshTimetable();
     });
@@ -1606,22 +1654,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // 科目・下校時間のマスをタップしたとき
   function openCellModal(ds) {
     const ri = +ds.r, di = +ds.d, gi = +ds.g;
+    const src = ds.src || 'today';
     const row = TT.rows[ri];
-    const cell = row.cells[di];
-    target = { ri, di, gi };
+    target = { ri, di, gi, src };
 
     cardContainer.innerHTML = '';
     mergeSlot.innerHTML = '';
     customInput.value = '';
 
-    // 下校の行にも「いっしょ／わける」を出す
-    addMergeButton(ri, di);
-
     const isExit = (row.type === 'exit');
-    modalTitle.textContent = isExit ? '下校時間を選んでください' : '科目を選んでください';
+    modalTitle.innerHTML = (isExit ? '下校時間を選んでください' : '科目を選んでください') +
+      '<br><span class="modal-note">' +
+      (src === 'base' ? 'きほんの週時程を なおします' : 'きょうだけ なおします') +
+      '</span>';
+
+    // 「いっしょ／わける」のボタン
+    addMergeButton(ri, di, src);
 
     const cards = isExit ? timeCards : subjectCards;
-    showCards(cards, val => setCell(ri, di, gi, val));
+    showCards(cards, val => setCell(ri, di, gi, val, src));
 
     // 「じゅぎょう なし（黒いマス）」にするボタン
     if (!isExit) {
@@ -1629,7 +1680,7 @@ document.addEventListener('DOMContentLoaded', () => {
       none.className = 'subject-card none-card';
       none.textContent = 'なし（黒）';
       none.addEventListener('click', () => {
-        setCell(ri, di, gi, null);
+        setCell(ri, di, gi, null, src);
         closeModal();
       });
       cardContainer.appendChild(none);
@@ -1659,10 +1710,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // マスの中身を書きかえる
-  function setCell(ri, di, gi, val) {
-    const cell = TT.rows[ri].cells[di];
+  function setCell(ri, di, gi, val, src) {
+    const cur = (src === 'base') ? TT.rows[ri].cells[di] : getCell(ri, di);
+    const cell = JSON.parse(JSON.stringify(cur));
     if (cell.m) cell.v[0] = val;
     else cell.v[gi] = val;
+    putCell(ri, di, cell, src);
     refreshTimetable();
   }
 
@@ -1673,7 +1726,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (target.kind === 'day') TT.days[target.idx] = val;
     else if (target.kind === 'grade') TT.grades[target.idx] = val;
     else if (target.kind === 'time') TT.rows[target.idx].time = val;
-    else setCell(target.ri, target.di, target.gi, val);
+    else setCell(target.ri, target.di, target.gi, val, target.src);
     closeModal();
     refreshTimetable();
   });
@@ -1686,10 +1739,19 @@ document.addEventListener('DOMContentLoaded', () => {
   closeModalBtn.addEventListener('click', closeModal);
   modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
-  // きほんの時間割に もどす
+  // きょうの変更だけ けす（きほんはそのまま）
+  document.getElementById('clearTodayBtn').addEventListener('click', () => {
+    if (confirm('きょうの へんこうを けしますか？\n（きほんの週時程は そのままです）')) {
+      TODAY = {};
+      refreshTimetable();
+    }
+  });
+
+  // きほんの週時程を さいしょに もどす
   document.getElementById('resetTableBtn').addEventListener('click', () => {
-    if (confirm('時間割を、きほんの形にもどしますか？\n（朝の会のチェックはそのまま残ります）')) {
+    if (confirm('きほんの週時程を、さいしょの形にもどしますか？\n（今日の変更も消えます）')) {
       TT = JSON.parse(JSON.stringify(BASE));
+      TODAY = {};
       refreshTimetable();
     }
   });
