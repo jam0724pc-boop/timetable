@@ -19,9 +19,16 @@ body {
   background-color: #f0f2f5;
   color: #212121;
   -webkit-user-select: none;
+  -ms-user-select: none;
   user-select: none;
 }
-button, input { font-family: inherit; font-weight: 700; -webkit-tap-highlight-color: transparent; }
+button, input {
+  font-family: inherit;
+  font-weight: 700;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+button { appearance: none; -webkit-appearance: none; }
 
 /* ===== ホーム画面 ===== */
 .home-title {
@@ -39,7 +46,7 @@ button, input { font-family: inherit; font-weight: 700; -webkit-tap-highlight-co
   align-items: baseline;        /* 文字の下の線でそろえる */
   gap: 14px;
   width: 100%;
-  min-height: 92px;             /* 高さをそろえる（E） */
+  min-height: clamp(92px, 15vw, 124px);   /* 高さをそろえる（E） */
   box-sizing: border-box;
   text-align: left;
   background: white;
@@ -55,28 +62,35 @@ button, input { font-family: inherit; font-weight: 700; -webkit-tap-highlight-co
 
 /* マークは行の中央にそろえる */
 .icon-slot {
-  flex: 0 0 40px;
+  flex: 0 0 auto;
   align-self: center;
   display: flex;
   justify-content: center;
   color: #546e7a;
 }
 .item-icon { display: block; }
+/* ホームのマークも 画面幅に合わせて大きく */
+.menu-btn .item-icon {
+  width: clamp(38px, 6.4vw, 54px);
+  height: auto;
+}
 .item-head .item-icon { display: inline-block; vertical-align: -6px; }
 
-/* 番号 */
+/* 番号（画面幅に合わせて大きくなる） */
 .menu-btn .num {
   flex: 0 0 auto;
-  font-size: 30px;
+  font-size: clamp(30px, 5.4vw, 46px);
   color: #546e7a;
 }
-/* 項目名 */
+/* 項目名（画面幅に合わせて大きくなる） */
 .menu-label {
   flex: 1;
-  font-size: 30px;
-  line-height: 1.35;
+  font-size: clamp(30px, 5.4vw, 46px);
+  line-height: 1.3;
 }
 /* ふりがなを小さめに（B） */
+ruby { ruby-position: over; -webkit-ruby-position: over; }
+rt { line-height: 1.1; }
 .menu-label rt { font-size: 0.45em; }
 
 /* いまここ：行全体を濃い青に白文字（C） */
@@ -186,6 +200,73 @@ button, input { font-family: inherit; font-weight: 700; -webkit-tap-highlight-co
 }
 .view-btn.active { background: #1976d2; color: white; border-color: #1976d2; }
 
+/* 項目としての「おわり」を、タイマーと区別する */
+.finish-section {
+  margin-top: 26px;
+  padding-top: 16px;
+  border-top: 3px double #b0bec5;
+}
+.finish-note {
+  text-align: center;
+  font-size: 17px;
+  font-weight: 400;
+  color: #78909c;
+  margin-bottom: 10px;
+}
+/* タイマーが動いている間は、うすくして押せなくする */
+.finish-section.waiting { opacity: 0.35; pointer-events: none; }
+
+/* 朝の会おわりの かたづけ */
+.reset-section { margin-top: 26px; }
+.reset-head {
+  background: #e65100;
+  color: white;
+  font-size: 22px;
+  padding: 13px 14px;
+  border-radius: 10px 10px 0 0;
+}
+.reset-body {
+  background: #fff3e0;
+  border: 3px solid #e65100;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  padding: 16px;
+}
+.reset-note {
+  margin: 0 0 14px;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: #5d4037;
+}
+.big-reset-btn {
+  display: block;
+  width: 100%;
+  padding: 22px 12px;
+  font-size: 26px;
+  background: #e65100;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.big-reset-btn:active { background: #bf360c; }
+
+.sub-reset-btn {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  margin-bottom: 8px;
+  font-size: 17px;
+  background: #eceff1;
+  color: #455a64;
+  border: 2px solid #cfd8dc;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.sub-reset-btn:active { background: #cfd8dc; }
+.sub-reset-btn.danger { color: #c62828; border-color: #ef9a9a; }
+
 .toggle-btn {
   display: block; width: 100%; padding: 13px;
   margin-bottom: 12px;
@@ -267,7 +348,7 @@ button, input { font-family: inherit; font-weight: 700; -webkit-tap-highlight-co
 .item-head {
   background: #1565c0;
   color: white;
-  font-size: 30px;
+  font-size: clamp(28px, 5vw, 42px);
   text-align: center;
   padding: 14px 12px;
   border-radius: 10px;
@@ -749,13 +830,21 @@ table#timetable {
     </div>
 
     <button class="show-btn" id="startBtn">▶ スタート</button>
-    <button class="stop-btn" id="stopBtn" style="display:none;">⏱ タイマーを とめる</button>
+    <button class="stop-btn" id="stopBtn" style="display:none;">⏱ ここで タイマーを とめる</button>
     <div class="result-box" id="resultBox" style="display:none;"></div>
     <button class="undo-btn" id="againBtn" style="display:none;">↩ もういちど</button>
   </div>
 
-  <button class="show-btn item-done" data-item="7">✓ スピーチ おわり</button>
-  <button class="undo-btn item-undo" data-item="7" style="display:none;">↩ おわりを とりけす</button>
+  <!-- 朝の会の項目としての おわり（タイマーとは別） -->
+  <div class="finish-section" id="speechFinish">
+    <div class="finish-note">
+      にっちょくさんが <ruby>話<rt>はな</rt></ruby>しおわったら
+    </div>
+    <button class="show-btn item-done" data-item="7">
+      ✓ 7. スピーチを おえて つぎへ
+    </button>
+    <button class="undo-btn item-undo" data-item="7" style="display:none;">↩ おわりを とりけす</button>
+  </div>
 
   <!-- おたすけ（こまったときだけ 使う） -->
   <div class="help-section">
@@ -807,16 +896,29 @@ table#timetable {
 
   <p class="hint">※ 曜日・学年・科目・時間・下校時間は、タップして変更できます。<br>
   ※ マスをタップすると「3・4を いっしょにする／わける」も えらべます。</p>
-  <button id="clearTodayBtn" class="show-btn" style="background:#00897b; margin-top:14px;">
-    ↩ きょうの へんこうを けす
-  </button>
-  <button id="resetTableBtn" class="show-btn" style="background:#0277bd; margin-top:10px;">
-    ↩ きほんの週時程を さいしょに もどす
-  </button>
-  <button id="resetChecksBtn" class="show-btn" style="background:#f57c00; margin-top:10px;">
-    🔄 あさのかいの チェックを ぜんぶ消す
-  </button>
-  <button id="resetBtn" class="action-btn" style="margin-top:10px;">変更を初期化する</button>
+  <!-- 朝の会が終わったあとの かたづけ -->
+  <div class="reset-section">
+    <div class="reset-head">🔄 あさのかいが おわったら</div>
+    <div class="reset-body">
+      <p class="reset-note">
+        つぎの日の じゅんびをします。<br>
+        チェック・今日の予定の変更・日にち・天気が すべて まっさらに もどります。<br>
+        <b>きほんの週時程は そのまま残ります。</b>
+      </p>
+      <button id="nextDayBtn" class="big-reset-btn">
+        つぎの<ruby>日<rt>ひ</rt></ruby>の じゅんびをする
+      </button>
+    </div>
+  </div>
+
+  <!-- こまかい設定（ふだんは たたんでおく） -->
+  <button class="toggle-btn" id="toggleMoreBtn" style="margin-top:16px;">▼ こまかい せってい</button>
+  <div id="moreBox" style="display:none;">
+    <button id="clearTodayBtn" class="sub-reset-btn">きょうの 予定の変更だけ けす</button>
+    <button id="resetTableBtn" class="sub-reset-btn">きほんの週時程を さいしょに もどす</button>
+    <button id="resetChecksBtn" class="sub-reset-btn">チェックだけ けす</button>
+    <button id="resetBtn" class="sub-reset-btn danger">ぜんぶ 読みこみ直す</button>
+  </div>
 </div>
 
 <!-- ========== 時間割の表（本体：中身はJavaScriptが作ります） ========== -->
@@ -992,7 +1094,10 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       const num = btn.getAttribute('data-item') || openItem;
       if (num === '1') {
-        if (!buildLabel()) return;   // 日づけがえらばれていなければ何もしない
+        if (!buildLabel()) {          // 日づけがえらばれていないとき
+          alert('さきに 日にちを えらんでください。');
+          return;
+        }
         applyDateLabel();
       }
       markDone(num);
@@ -1492,6 +1597,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const stopBtn = document.getElementById('stopBtn');
   const againBtn = document.getElementById('againBtn');
   const resultBox = document.getElementById('resultBox');
+  const speechFinish = document.getElementById('speechFinish');
 
   const GOAL = 60;                  // 目ひょうの秒数（1分）
   const RING = 502.65;              // 円のふちの長さ
@@ -1540,6 +1646,7 @@ document.addEventListener('DOMContentLoaded', () => {
     themeBox.style.display = 'none';
     themeBox.textContent = '';
     helpBtn.disabled = false;
+    if (speechFinish) speechFinish.classList.remove('waiting');
   }
 
   startBtn.addEventListener('click', () => {
@@ -1548,6 +1655,7 @@ document.addEventListener('DOMContentLoaded', () => {
     againBtn.style.display = 'none';
     startBtn.style.display = 'none';
     stopBtn.style.display = 'block';
+    speechFinish.classList.add('waiting');   // 話している間は 押せなくする
     paintTimer(GOAL);
     timerId = setInterval(() => {
       const passed = (Date.now() - startTime) / 1000;
@@ -1576,6 +1684,7 @@ document.addEventListener('DOMContentLoaded', () => {
     resultBox.style.display = 'block';
     stopBtn.style.display = 'none';
     againBtn.style.display = 'block';
+    speechFinish.classList.remove('waiting');
   });
 
   againBtn.addEventListener('click', resetTimer);
@@ -1738,6 +1847,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   closeModalBtn.addEventListener('click', closeModal);
   modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+  // 「こまかい せってい」の 開け閉め
+  const moreBox = document.getElementById('moreBox');
+  const toggleMoreBtn = document.getElementById('toggleMoreBtn');
+  toggleMoreBtn.addEventListener('click', () => {
+    const open = (moreBox.style.display === 'none');
+    moreBox.style.display = open ? 'block' : 'none';
+    toggleMoreBtn.textContent = open ? '▲ こまかい せってい' : '▼ こまかい せってい';
+  });
+
+  // ★ つぎの日の じゅんび（朝の会おわりの かたづけ）
+  document.getElementById('nextDayBtn').addEventListener('click', () => {
+    if (!confirm('つぎの日の じゅんびを しますか？\n\n' +
+                 '・チェックが すべて消えます\n' +
+                 '・今日の予定の変更が 消えます\n' +
+                 '・日にちと天気が 消えます\n\n' +
+                 'きほんの週時程は そのまま残ります。')) return;
+
+    doneItems.clear();               // チェック
+    TODAY = {};                      // 今日の予定の変更
+    item1Label.innerHTML = defaultItem1;   // 日にち・天気の表示
+    pickedDate = null;
+    pickedWeather = null;
+    resetTimer();                    // スピーチのタイマーとテーマ
+    refreshHome();
+    refreshTimetable();
+    alert('じゅんびが できました。\nおつかれさまでした。');
+    showView('home');
+  });
 
   // きょうの変更だけ けす（きほんはそのまま）
   document.getElementById('clearTodayBtn').addEventListener('click', () => {
